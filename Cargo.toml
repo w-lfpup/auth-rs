@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [ "sqlite_interface", "sqlite_maintenance" ]
+
+[workspace.dependencies]
+argon2 = { version = "0.5", features = ["std"] }
+base64 = { version = "0.21" }
+futures = "0.3"
+rand = "0.9.0"
+rusqlite = { version = "0.32" }
+snowprints = { git = "https://github.com/taylor-vann/snowprints", version = "0.1" }
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"

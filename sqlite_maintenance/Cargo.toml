@@ -1,0 +1,12 @@
+[package]
+name = "sqlite_maintenance"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+rusqlite = { workspace = true }
+sqlite_interface = { path = "../sqlite_interface" }
+snowprints = { workspace = true }
