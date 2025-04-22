@@ -15,9 +15,15 @@ use sqlite_interface::{
 
 const roles: [&str; 3] = ["administrator", "roles", "editor"];
 
+// WAL journal mode
+
+// CREATE TABLES
 // Creating tables and creating fall back users and roles
 // is the same action.
-//
+
+// REMOVE ALL INVITATIONS (GO LIVE AND PUBLIC)
+
+// COPY DB
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
@@ -49,11 +55,6 @@ async fn main() -> Result<(), String> {
 
     Ok(())
 }
-
-// sqlite_db_auth pathbuf
-// origin_time
-// email
-// password
 
 async fn setup_dbs(config: &Config) -> Result<(), String> {
     // create tables

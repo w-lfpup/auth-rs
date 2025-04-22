@@ -4,6 +4,7 @@
 
 - People
 - Roles
+- Contacts
 - Roles to people
 
 

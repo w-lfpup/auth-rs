@@ -1,7 +1,7 @@
 use rusqlite::{Connection, Result};
 use std::path::PathBuf;
 
-pub struct Role {}
+pub struct TimebasedOneTimePassword {}
 
 pub fn create_table(path: &PathBuf) -> Result<(), String> {
     let conn = match Connection::open(path) {
@@ -10,10 +10,10 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
     };
 
     let results = conn.execute(
-        "CREATE TABLE IF NOT EXISTS emails (
+        "CREATE TABLE IF NOT EXISTS timebased_one_time_passwords (
             id INTEGER PRIMARY KEY,
             people_id INTEGER KEY NOT NULL,
-            email TEXT UNIQUE NOT NULL,
+            secret TEXT NOT NULL,
             deleted_at INTEGER
         )",
         (),

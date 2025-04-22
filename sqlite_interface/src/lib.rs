@@ -1,10 +1,3 @@
-pub mod emails;
-pub mod people;
-pub mod roles;
-pub mod roles_to_people;
-pub mod sessions;
-pub mod session_rate_limits;
-
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
@@ -33,23 +26,29 @@ impl AuthDb {
         })
     }
 
-    // session_exists()
-
-    // create_guest_session()
-    //   -> rate limit ip to guest session
-    //   -> if okay return guest session
-
-    // rate_limit_session() / session exists
-    //   -> yes no
-
-    // create_person_session_by_email()
-    //   -> rate limit person session create because password are expensive
-    //   ->
-
-    // uwer has roles
+    // Dev stories like, create invitation
+    // 
 }
 
-pub struct AuthMaintenanceDb  {}
+pub struct AuthMaintenanceDb  {
+    db_path: PathBuf,
+}
+
+impl AuthMaintenanceDb {
+    pub fn new(db_path: &PathBuf, origin_time_ms: u64) -> Result<AuthDb, String> {
+        let snowprints = match create_snowprints(origin_time_ms, None) {
+            Ok(sp) => sp,
+            Err(e) => return Err("failed to create snowprints".to_string()),
+        };
+
+        // setup tables
+
+        Ok(AuthDb {
+            db_path: db_path.clone(),
+            snowprints: snowprints,
+        })
+    }
+}
 
 // UTILITY functions
 
@@ -136,3 +135,113 @@ pub fn validate_password(password: &str, password_hash_params: &str) -> bool {
 //   -> ratelimit session
 //   -> return people_id Option<u64>
 //
+
+
+// async fn setup_dbs(config: &Config) -> Result<(), String> {
+//     // create tables
+//     if let Err(e) = emails::create_table(&config.sqlite_db_auth) {
+//         return Err(e.to_string());
+//     };
+
+//     if let Err(e) = people::create_table(&config.sqlite_db_auth) {
+//         return Err(e.to_string());
+//     };
+
+//     if let Err(e) = roles::create_table(&config.sqlite_db_auth) {
+//         return Err(e.to_string());
+//     };
+
+//     if let Err(e) = roles_to_people::create_table(&config.sqlite_db_auth) {
+//         return Err(e.to_string());
+//     };
+
+//     if let Err(e) = sessions::create_table(&config.sqlite_db_auth) {
+//         return Err(e.to_string());
+//     };
+
+//     // create fallback person (ME!)
+//     let mut snowprints = match create_snowprints(config.origin_time, None) {
+//         Ok(sp) => sp,
+//         Err(e) => return Err(e),
+//     };
+
+//     let fallback_path_buf = match env::args().nth(3) {
+//         Some(fbjs) => PathBuf::from(fbjs),
+//         _ => return Err("arg[3] fallback path not included.".to_string()),
+//     };
+
+//     let fallback_account = match FallbackUser::from_filepath(&fallback_path_buf).await {
+//         Ok(fu) => fu,
+//         Err(e) => return Err(e),
+//     };
+
+//     let people_id = match snowprints.compose() {
+//         Ok(id) => id,
+//         _ => return Err("couldn't create people_id for fallback user.".to_string()),
+//     };
+
+//     let email_id = match snowprints.compose() {
+//         Ok(id) => id,
+//         _ => return Err("couldn't create email_id for fallback user.".to_string()),
+//     };
+
+//     // email
+//     if let Err(e) = emails::create(
+//         &config.sqlite_db_auth,
+//         email_id,
+//         people_id,
+//         &fallback_account.email,
+//     ) {
+//         return Err("couldn't create email entry for fallback user.".to_string());
+//     };
+
+//     let password_hash_params = match hash_password(&fallback_account.password) {
+//         Ok(id) => id,
+//         _ => return Err("couldn't hash password for fallback user.".to_string()),
+//     };
+
+//     if let Err(e) = people::create(&config.sqlite_db_auth, people_id, &password_hash_params) {
+//         return Err("couldn't create people entry for fallback user.".to_string());
+//     }
+
+//     // create roles
+
+//     for role in roles {
+//         println!("creating role: {}", role);
+
+//         let role_id = match snowprints.compose() {
+//             Ok(role_id) => role_id,
+//             _ => {
+//                 println!("failed to create role_id");
+//                 continue;
+//             }
+//         };
+
+//         if let Err(e) = roles::create(&config.sqlite_db_auth, role_id, role) {
+//             return Err("couldn't create role entry.".to_string());
+//         };
+
+//         let roles_to_people_id = match snowprints.compose() {
+//             Ok(roles_to_people_id) => roles_to_people_id,
+//             _ => continue,
+//         };
+
+//         if let Err(e) = roles_to_people::create(
+//             &config.sqlite_db_auth,
+//             roles_to_people_id,
+//             role_id,
+//             people_id,
+//         ) {
+//             return Err("couldn't create role_to_people entry.".to_string());
+//         };
+//     }
+
+//     Ok(())
+// }
+
+// async fn clean_up_dbs(config: &Config) -> Result<(), String> {
+//     println!("clean_up_dbs()");
+
+
+//     Ok(())
+// }
