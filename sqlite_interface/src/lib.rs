@@ -1,11 +1,11 @@
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
+use rusqlite::{Connection, Result};
 use snowprints::{Settings as SnowprintSettings, Snowprint};
 use std::path::PathBuf;
 use std::time::Duration;
 use std::time::UNIX_EPOCH;
-use rusqlite::{Connection, Result};
 
 mod connector;
 mod invitations;
@@ -23,11 +23,11 @@ pub struct AuthDb {
 impl AuthDb {
     pub fn from(db_path: &PathBuf, origin_time_ms: u64) -> Result<AuthDb, String> {
         // get duration
-        let connector = match Connector::from(db_path, 12, 12) {
+        let connector = match Connector::from(db_path, 4, 4) {
             Ok(conn) => conn,
             Err(e) => return Err(e.to_string()),
         };
-        
+
         Ok(AuthDb {
             origin_time_ms: origin_time_ms.clone(),
             connector: connector,
@@ -120,7 +120,6 @@ pub fn validate_password(password: &str, password_hash_params: &str) -> bool {
 //   -> ratelimit session
 //   -> return people_id Option<u64>
 //
-
 
 // async fn setup_dbs(config: &Config) -> Result<(), String> {
 //     // create tables
@@ -226,7 +225,6 @@ pub fn validate_password(password: &str, password_hash_params: &str) -> bool {
 
 // async fn clean_up_dbs(config: &Config) -> Result<(), String> {
 //     println!("clean_up_dbs()");
-
 
 //     Ok(())
 // }

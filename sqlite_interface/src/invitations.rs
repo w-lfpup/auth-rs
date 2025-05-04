@@ -2,8 +2,8 @@
 
 use rand::Rng;
 use rusqlite::{Connection, Result};
+use snowprints::{decompose, Settings as SnowprintSettings, Snowprint};
 use std::path::PathBuf;
-use snowprints::{Settings as SnowprintSettings, Snowprint, decompose};
 
 const INVITATION_LENGTH_MS: usize = 2629800000;
 
@@ -45,12 +45,8 @@ impl InvitationsCrud {
             snowprints: snowprints,
         })
     }
-    
-    fn create(
-        &mut self,
-        contact_type: u16,
-        contact_data: String,
-    ) -> Result<String, String> {
+
+    fn create(&mut self, contact_type: u16, contact_data: String) -> Result<String, String> {
         let snowprint = match self.snowprints.compose() {
             Ok(sp) => sp,
             Err(e) => return Err("snowprint error has no default formatter".to_string()),
@@ -103,7 +99,7 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
 //         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
 //     };
 
-//     // create session id 
+//     // create session id
 //     let session_id = match self.snowprints.compose();
 
 //     let mut rng = rand::thread_rng();
@@ -122,7 +118,7 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
 //     }
 
 //     Ok(())
-// }   
+// }
 
 // pub fn read(path: &PathBuf, session_id: u64) -> Result<Option<()>, String> {
 //     let conn = match Connection::open(path) {
@@ -185,7 +181,6 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
 
 //     Ok(())
 // }
-
 
 // Invitations Maintenance
 

@@ -1,9 +1,9 @@
+use rusqlite::Connection;
 use std::path::PathBuf;
-use rusqlite::{Connection};
 
 pub struct Connector {
     db_path: PathBuf,
-    max_read_connections: usize, 
+    max_read_connections: usize,
     max_write_connections: usize,
     read_connections: Vec<Connection>,
     write_connections: Vec<Connection>,
@@ -12,15 +12,23 @@ pub struct Connector {
 impl Connector {
     pub fn from(
         db_path: &PathBuf,
-        max_read_connections: usize, 
+        max_read_connections: usize,
         max_write_connections: usize,
     ) -> Result<Connector, String> {
-        // get duration
-        
+        let max_read = match max_read_connections {
+            0 => 1,
+            _ => max_read_connections,
+        };
+
+        let max_write = match max_write_connections {
+            0 => 1,
+            _ => max_write_connections,
+        };
+
         Ok(Connector {
             db_path: db_path.clone(),
-            max_read_connections: 12, 
-            max_write_connections: 12,
+            max_read_connections: max_read,
+            max_write_connections: max_write,
             read_connections: Vec::new(),
             write_connections: Vec::new(),
         })
@@ -30,10 +38,10 @@ impl Connector {
         if let Some(conn) = self.read_connections.pop() {
             return Ok(conn);
         }
-        
+
         match Connection::open(&self.db_path) {
             Ok(cn) => Ok(cn),
-            Err(e) => return Err("falled to connect to sqlite db (session)".to_string()),
+            Err(e) => return Err("falled to create read connection".to_string()),
         }
     }
 
@@ -47,10 +55,10 @@ impl Connector {
         if let Some(conn) = self.write_connections.pop() {
             return Ok(conn);
         }
-        
+
         match Connection::open(&self.db_path) {
             Ok(cn) => Ok(cn),
-            Err(e) => return Err("falled to connect to sqlite db (session)".to_string()),
+            Err(e) => return Err("falled to create write connection".to_string()),
         }
     }
 
