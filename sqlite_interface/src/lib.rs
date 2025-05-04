@@ -5,47 +5,32 @@ use snowprints::{Settings as SnowprintSettings, Snowprint};
 use std::path::PathBuf;
 use std::time::Duration;
 use std::time::UNIX_EPOCH;
+use rusqlite::{Connection, Result};
+
+mod connector;
+mod invitations;
+
+use connector::Connector;
 
 // An intentionally limited, structured, and journey driven API
 
+// origin time duration
 pub struct AuthDb {
-    db_path: PathBuf,
-    snowprints: Snowprint,
+    origin_time_ms: u64,
+    connector: Connector,
 }
 
 impl AuthDb {
     pub fn from(db_path: &PathBuf, origin_time_ms: u64) -> Result<AuthDb, String> {
-        let snowprints = match create_snowprints(origin_time_ms, None) {
-            Ok(sp) => sp,
-            Err(e) => return Err("failed to create snowprints".to_string()),
+        // get duration
+        let connector = match Connector::from(db_path, 12, 12) {
+            Ok(conn) => conn,
+            Err(e) => return Err(e.to_string()),
         };
-
+        
         Ok(AuthDb {
-            db_path: db_path.clone(),
-            snowprints: snowprints,
-        })
-    }
-
-    // Dev stories like, create invitation
-    // 
-}
-
-pub struct AuthMaintenanceDb  {
-    db_path: PathBuf,
-}
-
-impl AuthMaintenanceDb {
-    pub fn new(db_path: &PathBuf, origin_time_ms: u64) -> Result<AuthDb, String> {
-        let snowprints = match create_snowprints(origin_time_ms, None) {
-            Ok(sp) => sp,
-            Err(e) => return Err("failed to create snowprints".to_string()),
-        };
-
-        // setup tables
-
-        Ok(AuthDb {
-            db_path: db_path.clone(),
-            snowprints: snowprints,
+            origin_time_ms: origin_time_ms.clone(),
+            connector: connector,
         })
     }
 }

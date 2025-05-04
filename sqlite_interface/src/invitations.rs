@@ -3,16 +3,68 @@
 use rand::Rng;
 use rusqlite::{Connection, Result};
 use std::path::PathBuf;
+use snowprints::{Settings as SnowprintSettings, Snowprint, decompose};
 
-const GUEST_SESSION_LENGTH_MS: usize = 2629800000;
-const USER_SESSION_LENGTH_MS: usize = 7889400000;
+const INVITATION_LENGTH_MS: usize = 2629800000;
 
-// ENDS UP BEING THE SAME LOGIC FOR
-//   SIGNUP_BY_EMAIL
-//   SIGNUP_BY_PHONE
-//   RESET_PASSWORD_BY_EMAIL
-//   RESET_PASSWORD_BY_PHONE
-//
+pub struct Invitation {
+    id: u64,
+    session: u64,
+    session_length_ms: usize,
+    contact_type: u16,
+    contact_data: String,
+    completed_at: u64,
+    deleted_at: u64,
+}
+
+// let snowprints = match create_snowprints(origin_time_ms, None) {
+//     Ok(sp) => sp,
+//     Err(e) => return Err("failed to create snowprints".to_string()),
+// };
+
+// id INTEGER PRIMARY KEY UNIQUE,
+// contact_type INTEGER NOT NULL,
+// contact_data TEXT KEY UNIQUE NOT NULL,
+// session INTEGER NOT NULL,
+// session_length_ms INTEGER NOT NULL,
+// completed_at INTEGER,
+// deleted_at INTEGER
+
+pub struct InvitationsCrud {
+    snowprints: Snowprint,
+}
+
+impl InvitationsCrud {
+    fn new(&self, snowprint_settings: SnowprintSettings) -> Result<InvitationsCrud, String> {
+        let snowprints = match Snowprint::new(snowprint_settings) {
+            Ok(sp) => sp,
+            Err(e) => return Err("failed to create snowprints".to_string()),
+        };
+
+        Ok(InvitationsCrud {
+            snowprints: snowprints,
+        })
+    }
+    
+    fn create(
+        &mut self,
+        contact_type: u16,
+        contact_data: String,
+    ) -> Result<String, String> {
+        let snowprint = match self.snowprints.compose() {
+            Ok(sp) => sp,
+            Err(e) => return Err("snowprint error has no default formatter".to_string()),
+        };
+
+        let (timestamp_ms, _, _) = decompose(snowprint);
+
+        // get snowprint
+        // get random 128
+        // convert to hex
+        // return as string
+        Ok("".to_string())
+    }
+}
 
 pub fn create_table(path: &PathBuf) -> Result<(), String> {
     let conn = match Connection::open(path) {
@@ -23,10 +75,10 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS invitations (
             id INTEGER PRIMARY KEY UNIQUE,
+            contact_type INTEGER NOT NULL,
+            contact_data TEXT KEY UNIQUE NOT NULL,
             session INTEGER NOT NULL,
             session_length_ms INTEGER NOT NULL,
-            contact_type INTEGER KEY NOT NULL,
-            contact_data TEXT KEY NOT NULL,
             completed_at INTEGER,
             deleted_at INTEGER
         )",
@@ -34,96 +86,124 @@ pub fn create_table(path: &PathBuf) -> Result<(), String> {
     );
 
     if let Err(e) = results {
-        return Err("signups_email table: \n".to_string() + &e.to_string());
+        return Err("invitations table: \n".to_string() + &e.to_string());
     }
 
     Ok(())
 }
 
-pub fn create(
-    path: &PathBuf,
-    session_id: u64,
-    session_length_ms: u64,
-) -> Result<(), String> {
-    let conn = match Connection::open(path) {
-        Ok(cn) => cn,
-        Err(e) => return Err("falled to connect to sqlite db (signups_email)".to_string()),
-    };
+// pub fn create(
+//     &mut self,
+//     path: &PathBuf,
+//     contact_type: u16,
+//     contact_content: &str,
+// ) -> Result<(), String> {
+//     let conn = match Connection::open(path) {
+//         Ok(cn) => cn,
+//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
+//     };
 
-    let mut rng = rand::thread_rng();
-    let session: u64 = rng.gen();
+//     // create session id 
+//     let session_id = match self.snowprints.compose();
 
-    let results = conn.execute(
-        "INSERT INTO signups_email
-        	(id, people_id, session, session_length_ms)
-        VALUES
-        	(?1, ?2, ?3, ?4)",
-        (session_id, people_id, session, session_length_ms),
-    );
+//     let mut rng = rand::thread_rng();
+//     let session: u64 = rng.gen();
 
-    if let Err(e) = results {
-        return Err("create signups_email: \n".to_string() + &e.to_string());
-    }
+//     let results = conn.execute(
+//         "INSERT INTO invitations
+//             (id, contact_type, contact_data, session, session_length_ms)
+//         VALUES
+//             (?1, ?2, ?3, ?4, ?5)",
+//         (session_id, contact_type, contact_data, session, self.session_length_ms),
+//     );
 
-    Ok(())
-}
+//     if let Err(e) = results {
+//         return Err("create invitations: \n".to_string() + &e.to_string());
+//     }
 
-pub fn read(path: &PathBuf, session_id: u64) -> Result<(), String> {
-    let conn = match Connection::open(path) {
-        Ok(cn) => cn,
-        Err(e) => return Err("falled to connect to sqlite db (signups_email)".to_string()),
-    };
+//     Ok(())
+// }   
 
-    let results = conn.execute(
-        "SELECT signups_email
-        WHERE id = ?1",
-        [session_id],
-    );
+// pub fn read(path: &PathBuf, session_id: u64) -> Result<Option<()>, String> {
+//     let conn = match Connection::open(path) {
+//         Ok(cn) => cn,
+//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
+//     };
 
-    // iterate return
+//     let results = conn.execute(
+//         "SELECT invitations
+//         WHERE id = ?1",
+//         [session_id],
+//     );
 
-    if let Err(e) = results {
-        return Err("read signups_email: \n".to_string() + &e.to_string());
-    }
+//     // iterate return
 
-    Ok(())
-}
+//     if let Err(e) = results {
+//         return Err("read invitations: \n".to_string() + &e.to_string());
+//     }
 
-pub fn delete(path: &PathBuf, session_id: u64, timestamp_ms: u64) -> Result<(), String> {
-    let conn = match Connection::open(path) {
-        Ok(cn) => cn,
-        Err(e) => return Err("falled to connect to sqlite db (signups_email)".to_string()),
-    };
+//     Ok(None)
+// }
 
-    let results = conn.execute(
-        "UPDATE signups_email
-        SET deleted_at = ?1
-        WHERE id = ?2",
-        (timestamp_ms, session_id),
-    );
+// pub fn read_by_contact_content(path: &PathBuf, contact_info: &str) -> Result<Option<()>, String> {
+//     let conn = match Connection::open(path) {
+//         Ok(cn) => cn,
+//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
+//     };
 
-    if let Err(e) = results {
-        return Err("delete signups_email: \n".to_string() + &e.to_string());
-    }
+//     let results = conn.execute(
+//         "SELECT invitations
+//         WHERE id = ?1",
+//         [session_id],
+//     );
 
-    Ok(())
-}
+//     // iterate return
 
-pub fn dangerously_delete(path: &PathBuf, people_id: u64, timestamp_ms: u64) -> Result<(), String> {
-    let conn = match Connection::open(path) {
-        Ok(cn) => cn,
-        Err(e) => return Err("falled to connect to sqlite db (signups_email)".to_string()),
-    };
+//     if let Err(e) = results {
+//         return Err("read invitations: \n".to_string() + &e.to_string());
+//     }
 
-    let results = conn.execute(
-        "DELETE signups_email
-        WHERE id = ?1",
-        [people_id],
-    );
+//     Ok(None)
+// }
 
-    if let Err(e) = results {
-        return Err("dangerously delete signups_email: \n".to_string() + &e.to_string());
-    }
+// pub fn delete(path: &PathBuf, session_id: u64, timestamp_ms: u64) -> Result<(), String> {
+//     let conn = match Connection::open(path) {
+//         Ok(cn) => cn,
+//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
+//     };
 
-    Ok(())
-}
+//     let results = conn.execute(
+//         "UPDATE invitations
+//         SET deleted_at = ?1
+//         WHERE id = ?2",
+//         (timestamp_ms, session_id),
+//     );
+
+//     if let Err(e) = results {
+//         return Err("delete invitations: \n".to_string() + &e.to_string());
+//     }
+
+//     Ok(())
+// }
+
+
+// Invitations Maintenance
+
+// pub fn dangerously_delete(path: &PathBuf, people_id: u64, timestamp_ms: u64) -> Result<(), String> {
+//     let conn = match Connection::open(path) {
+//         Ok(cn) => cn,
+//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
+//     };
+
+//     let results = conn.execute(
+//         "DELETE invitations
+//         WHERE id = ?1",
+//         [people_id],
+//     );
+
+//     if let Err(e) = results {
+//         return Err("dangerously delete invitations: \n".to_string() + &e.to_string());
+//     }
+
+//     Ok(())
+// }
