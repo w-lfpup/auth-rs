@@ -2,7 +2,7 @@ use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
 use rusqlite::{Connection, Result};
-use snowprints::{Settings as SnowprintSettings, Snowprint};
+use snowprints::{Settings as SnowprintSettings, Snowprints};
 use std::path::PathBuf;
 use std::time::Duration;
 use std::time::UNIX_EPOCH;
@@ -38,23 +38,21 @@ impl AuthDb {
 // UTILITY functions
 
 pub fn create_snowprints(
-    origin_system_time: u64,
+    origin_time_ms: u64,
     volume_params: Option<(u64, u64)>,
-) -> Result<Snowprint, String> {
-    let origin_time_duration = Duration::from_millis(origin_system_time);
-
+) -> Result<Snowprints, String> {
     let (logical_volume_base, logical_volume_length) = match volume_params {
         Some(vp) => vp,
         _ => (0, 8192),
     };
 
     let snowprint_settings = SnowprintSettings {
-        origin_system_time: UNIX_EPOCH + origin_time_duration,
+        origin_time_ms: origin_time_ms,
         logical_volume_base: logical_volume_base,
         logical_volume_length: logical_volume_length,
     };
 
-    match Snowprint::new(snowprint_settings) {
+    match Snowprints::new(snowprint_settings) {
         Ok(sp) => Ok(sp),
         Err(e) => return Err("failed to create snowprints".to_string()),
     }

@@ -2,7 +2,7 @@
 
 use rand::Rng;
 use rusqlite::{Connection, Result};
-use snowprints::{decompose, Settings as SnowprintSettings, Snowprint};
+use snowprints::{decompose, Settings as SnowprintSettings, Snowprints};
 use std::path::PathBuf;
 
 const INVITATION_LENGTH_MS: usize = 2629800000;
@@ -31,12 +31,12 @@ pub struct Invitation {
 // deleted_at INTEGER
 
 pub struct InvitationsCrud {
-    snowprints: Snowprint,
+    snowprints: Snowprints,
 }
 
 impl InvitationsCrud {
     fn new(&self, snowprint_settings: SnowprintSettings) -> Result<InvitationsCrud, String> {
-        let snowprints = match Snowprint::new(snowprint_settings) {
+        let snowprints = match Snowprints::new(snowprint_settings) {
             Ok(sp) => sp,
             Err(e) => return Err("failed to create snowprints".to_string()),
         };
