@@ -11,3 +11,4 @@ tokio = { workspace = true }
 rusqlite = { workspace = true }
 snowprints = { workspace = true }
 rand = { workspace = true }
+base64 = { workspace = true }
