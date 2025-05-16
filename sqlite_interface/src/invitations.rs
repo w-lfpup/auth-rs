@@ -198,27 +198,6 @@ pub fn read(conn: Connection, invitation_session: &str) -> Result<Option<()>, St
     Ok(None)
 }
 
-// pub fn read_by_contact_content(path: &PathBuf, contact_info: &str) -> Result<Option<()>, String> {
-//     let conn = match Connection::open(path) {
-//         Ok(cn) => cn,
-//         Err(e) => return Err("falled to connect to sqlite db (invitations table)".to_string()),
-//     };
-
-//     let results = conn.execute(
-//         "SELECT invitations
-//         WHERE id = ?1",
-//         [session_id],
-//     );
-
-//     // iterate return
-
-//     if let Err(e) = results {
-//         return Err("read invitations: \n".to_string() + &e.to_string());
-//     }
-
-//     Ok(None)
-// }
-
 // pub fn delete(path: &PathBuf, session_id: u64, timestamp_ms: u64) -> Result<(), String> {
 //     let conn = match Connection::open(path) {
 //         Ok(cn) => cn,
