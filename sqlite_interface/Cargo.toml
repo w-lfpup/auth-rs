@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 argon2 = { workspace = true}
 tokio = { workspace = true }
+serde = { workspace = true }
 rusqlite = { workspace = true }
 snowprints = { workspace = true }
 rand = { workspace = true }
