@@ -1,11 +1,8 @@
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::Argon2;
-use rusqlite::{Connection, Result};
 use snowprints::{Settings as SnowprintSettings, Snowprints};
 use std::path::PathBuf;
-use std::time::Duration;
-use std::time::UNIX_EPOCH;
 
 mod connector;
 mod invitations;
@@ -56,7 +53,7 @@ pub fn create_snowprints(
 
     match Snowprints::new(snowprint_settings) {
         Ok(sp) => Ok(sp),
-        Err(e) => return Err("failed to create snowprints".to_string()),
+        Err(_e) => return Err("failed to create snowprints".to_string()),
     }
 }
 
@@ -67,14 +64,14 @@ pub fn hash_password(password: &str) -> Result<String, String> {
     // Hash password to PHC string ($argon2id$v=19$...)
     match argon2.hash_password(password.as_bytes(), &salt) {
         Ok(ph) => Ok(ph.to_string()),
-        Err(e) => return Err("person, create error:\n".to_string() + &e.to_string()),
+        Err(e) => return Err(e.to_string()),
     }
 }
 
 pub fn validate_password(password: &str, password_hash_params: &str) -> bool {
     let parsed_hash = match PasswordHash::new(&password_hash_params) {
         Ok(ph) => ph,
-        Err(e) => return false,
+        _ => return false,
     };
 
     match Argon2::default().verify_password(password.as_bytes(), &parsed_hash) {

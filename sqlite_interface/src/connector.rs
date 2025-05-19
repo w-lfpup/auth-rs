@@ -41,7 +41,7 @@ impl Connector {
 
         match Connection::open(&self.db_path) {
             Ok(cn) => Ok(cn),
-            Err(e) => return Err("falled to create read connection".to_string()),
+            Err(e) => return Err(e.to_string()),
         }
     }
 
@@ -58,7 +58,7 @@ impl Connector {
 
         match Connection::open(&self.db_path) {
             Ok(cn) => Ok(cn),
-            Err(e) => return Err("falled to create write connection".to_string()),
+            Err(e) => return Err(e.to_string()),
         }
     }
 
