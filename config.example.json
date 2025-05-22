@@ -1,0 +1,5 @@
+{
+    "auth": {
+        "sqlite_path": "auth.sqlite"
+    }
+}

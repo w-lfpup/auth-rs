@@ -2,17 +2,21 @@
 
 ## Auth
 
-- People
-- Roles
-- Contacts
-- Roles to people
+This is authenitication
 
+Lets focus on small mvp:
+- invite user
+- create person / screen name from invitation
+- create contact info
 
-- Ip rate limits
-- Sessions
-- Session rate limits
-- (login ratelimits) User Session rate limits
+- get user by screename
+- get user by contact
+- veryfy user by password
+- verify user has role
 
-
-- Password Reset session
-- Email change session
+Authorization
+- create role
+- set role to person
+- create session
+- verify session
+- update session

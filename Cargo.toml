@@ -1,9 +1,14 @@
 [workspace]
 resolver = "2"
-members = [ "config", "sqlite_interface" ]
+members = [ "config", "sqlite_interface", "auth_server" ]
 
 [workspace.dependencies]
+bytes = "1"
 argon2 = { version = "0.5", features = ["std"] }
+futures-util = { version = "0.3", default-features = false }
+http-body-util = "0.1"
+hyper-util = { version = "0.1", features = ["full"] }
+hyper = { version = "1", features = ["full"] }
 base64 = { version = "0.22" }
 futures = "0.3"
 rand = "0.9.0"
