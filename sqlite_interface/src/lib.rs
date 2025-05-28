@@ -8,7 +8,6 @@ mod connector;
 mod invitations;
 
 use connector::Connector;
-
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 
 // An intentionally limited, structured, and journey driven API
