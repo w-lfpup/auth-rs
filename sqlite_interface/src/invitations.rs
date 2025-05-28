@@ -5,16 +5,17 @@ use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 use std::path::PathBuf;
 
+// 1 DAY as ms
 const INVITATION_LENGTH_MS: usize = 2629800000;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Invitation {
     id: u64,
     session: u64,
-    session_length_ms: usize,
+    session_length_ms: u64,
     contact_type: u16,
     contact_content: String,
-    deleted_at: u64,
+    deleted_at: Option<u64>,
 }
 
 fn get_invitation_from_row(row: &Row) -> Result<Invitation, RusqliteError> {

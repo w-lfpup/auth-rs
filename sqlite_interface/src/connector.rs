@@ -4,44 +4,33 @@ use std::sync::Mutex;
 
 pub struct Connector {
     db_path: PathBuf,
-    max_read_connections: usize,
-    max_write_connections: usize,
-    read_connections: Mutex<Vec<Connection>>,
-    write_connections: Mutex<Vec<Connection>>,
+    max_connection_count: usize,
+    connections: Mutex<Vec<Connection>>,
 }
 
 impl Connector {
     pub fn from(
         db_path: &PathBuf,
-        max_read_connections: usize,
-        max_write_connections: usize,
+        max_connection_count: usize,
     ) -> Result<Connector, String> {
-        let max_read = match max_read_connections {
-            0 => 1,
-            _ => max_read_connections,
-        };
-
-        let max_write = match max_write_connections {
-            0 => 1,
-            _ => max_write_connections,
-        };
+        if max_connection_count == 0 {
+            return Err("max connections cannot be 0".to_string())
+        }
 
         Ok(Connector {
             db_path: db_path.clone(),
-            max_read_connections: max_read,
-            max_write_connections: max_write,
-            read_connections: Mutex::new(Vec::new()),
-            write_connections: Mutex::new(Vec::new()),
+            max_connection_count: max_connection_count,
+            connections: Mutex::new(Vec::new()),
         })
     }
 
-    pub fn get_read_connection(&mut self) -> Result<Connection, String> {
-        let mut read_connections = match self.read_connections.lock() {
-            Ok(read_connections) => read_connections,
+    pub fn get_connection(&mut self) -> Result<Connection, String> {
+        let mut connections = match self.connections.lock() {
+            Ok(connections) => connections,
             Err(e) => return Err(e.to_string()),
         };
 
-        if let Some(conn) = read_connections.pop() {
+        if let Some(conn) = connections.pop() {
             return Ok(conn);
         }
 
@@ -51,43 +40,14 @@ impl Connector {
         }
     }
 
-    pub fn set_read_connection(&mut self, conn: Connection) -> Result<(), String> {
-        let mut read_connections = match self.read_connections.lock() {
-            Ok(read_connections) => read_connections,
+    pub fn set_connection(&mut self, conn: Connection) -> Result<(), String> {
+        let mut connections = match self.connections.lock() {
+            Ok(connections) => connections,
             Err(e) => return Err(e.to_string()),
         };
 
-        if read_connections.len() < self.max_read_connections {
-            read_connections.push(conn);
-        }
-
-        Ok(())
-    }
-
-    pub fn get_write_connection(&mut self) -> Result<Connection, String> {
-        let mut write_connections = match self.write_connections.lock() {
-            Ok(write_connections) => write_connections,
-            Err(e) => return Err(e.to_string()),
-        };
-
-        if let Some(conn) = write_connections.pop() {
-            return Ok(conn);
-        }
-
-        match Connection::open(&self.db_path) {
-            Ok(cn) => Ok(cn),
-            Err(e) => return Err(e.to_string()),
-        }
-    }
-
-    pub fn set_write_connection(&mut self, conn: Connection) -> Result<(), String> {
-        let mut write_connections = match self.write_connections.lock() {
-            Ok(write_connections) => write_connections,
-            Err(e) => return Err(e.to_string()),
-        };
-
-        if write_connections.len() < self.max_write_connections {
-            write_connections.push(conn);
+        if connections.len() < self.max_connection_count {
+            connections.push(conn);
         }
 
         Ok(())

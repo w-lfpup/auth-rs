@@ -21,7 +21,7 @@ pub struct AuthDb {
 impl AuthDb {
     pub fn from(db_path: &PathBuf, origin_time_ms: u64) -> Result<AuthDb, String> {
         // get duration
-        let connector = match Connector::from(db_path, 4, 4) {
+        let connector = match Connector::from(db_path, 8) {
             Ok(conn) => conn,
             Err(e) => return Err(e.to_string()),
         };
