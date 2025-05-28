@@ -7,8 +7,10 @@ use std::path::PathBuf;
 mod connector;
 mod invitations;
 
-use connector::Connector;
+mod invitation_actions;
+
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
+use connector::Connector;
 
 // An intentionally limited, structured, and journey driven API
 
@@ -25,6 +27,8 @@ impl AuthDb {
             Ok(conn) => conn,
             Err(e) => return Err(e.to_string()),
         };
+
+        // add invitations
 
         Ok(AuthDb {
             origin_time_ms: origin_time_ms.clone(),

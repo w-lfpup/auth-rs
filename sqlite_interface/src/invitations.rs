@@ -1,6 +1,7 @@
 // EMAIL INVITATIONS
 use serde::{Deserialize, Serialize};
 
+use base64::engine::general_purpose::URL_SAFE;
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 use std::path::PathBuf;
@@ -13,7 +14,7 @@ pub struct Invitation {
     id: u64,
     session: u64,
     session_length_ms: u64,
-    contact_type: u16,
+    contact_type: u64,
     contact_content: String,
     deleted_at: Option<u64>,
 }
@@ -36,7 +37,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
             session INTEGER NOT NULL,
             session_length_ms INTEGER NOT NULL,
             contact_type INTEGER NOT NULL,
-            contact_content TEXT KEY UNIQUE NOT NULL,
+            contact_content TEXT KEY NOT NULL,
             deleted_at INTEGER
         )",
         (),
@@ -52,7 +53,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
 pub fn create(
     conn: Connection,
     invitation_id: u64,
-    contact_type: u16,
+    contact_type: u64,
     contact_content: &str,
     session_length_ms: u32,
 ) -> Result<Option<Invitation>, String> {

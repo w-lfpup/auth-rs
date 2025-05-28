@@ -9,12 +9,9 @@ pub struct Connector {
 }
 
 impl Connector {
-    pub fn from(
-        db_path: &PathBuf,
-        max_connection_count: usize,
-    ) -> Result<Connector, String> {
+    pub fn from(db_path: &PathBuf, max_connection_count: usize) -> Result<Connector, String> {
         if max_connection_count == 0 {
-            return Err("max connections cannot be 0".to_string())
+            return Err("max connections cannot be 0".to_string());
         }
 
         Ok(Connector {
