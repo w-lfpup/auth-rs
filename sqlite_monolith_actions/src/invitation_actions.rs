@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use base64::engine::general_purpose::URL_SAFE;
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
-use std::path::PathBuf;
 
 use crate::invitations::Invitation;
 

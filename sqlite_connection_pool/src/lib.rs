@@ -2,19 +2,19 @@ use rusqlite::Connection;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-pub struct Connector {
+pub struct ConnectionPool {
     db_path: PathBuf,
     max_connection_count: usize,
     connections: Mutex<Vec<Connection>>,
 }
 
-impl Connector {
-    pub fn from(db_path: &PathBuf, max_connection_count: usize) -> Result<Connector, String> {
+impl ConnectionPool {
+    pub fn from(db_path: &PathBuf, max_connection_count: usize) -> Result<ConnectionPool, String> {
         if max_connection_count == 0 {
             return Err("max connections cannot be 0".to_string());
         }
 
-        Ok(Connector {
+        Ok(ConnectionPool {
             db_path: db_path.clone(),
             max_connection_count: max_connection_count,
             connections: Mutex::new(Vec::new()),

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ "config", "sqlite_interface", "auth_server" ]
+members = [ "config", "sqlite_connection_pool" ]
 
 [workspace.dependencies]
 bytes = "1"
