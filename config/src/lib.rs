@@ -11,8 +11,8 @@ pub struct Config {
     pub sqlite_auth_db_filepath: PathBuf,
     pub logical_volume_base: u64,
     pub logical_volume_length: u64,
-    pub max_read_connections: u16,
-    pub max_write_connections: u16,
+    pub max_read_connections: u64,
+    pub max_write_connections: u64,
 }
 
 impl Config {
