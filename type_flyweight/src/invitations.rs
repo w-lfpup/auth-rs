@@ -1,9 +1,6 @@
 // EMAIL INVITATIONS
 use serde::{Deserialize, Serialize};
 
-// 1 DAY as ms
-const INVITATION_LENGTH_MS: usize = 2629800000;
-
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Invitation {
     id: u64,

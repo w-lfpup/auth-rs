@@ -1,23 +1,19 @@
-// EMAIL INVITATIONS
-use serde::{Deserialize, Serialize};
-
-use base64::engine::general_purpose::URL_SAFE;
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
-use std::path::PathBuf;
+// use serde::{Deserialize, Serialize};
 
 // 1 DAY as ms
 const INVITATION_LENGTH_MS: usize = 2629800000;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Invitation {
-    id: u64,
-    session: u64,
-    session_length_ms: u64,
-    contact_type: u64,
-    contact_content: String,
-    deleted_at: Option<u64>,
-}
+// #[derive(Clone, Serialize, Deserialize, Debug)]
+// pub struct Invitation {
+//     id: u64,
+//     session: u64,
+//     session_length_ms: u64,
+//     contact_type: u64,
+//     contact_content: String,
+//     deleted_at: Option<u64>,
+// }
 
 fn get_invitation_from_row(row: &Row) -> Result<Invitation, RusqliteError> {
     Ok(Invitation {
@@ -126,70 +122,100 @@ pub fn read(conn: Connection, invitation_id: u64) -> Result<Option<Invitation>, 
     Ok(None)
 }
 
-pub fn delete(
-    conn: Connection,
-    invitation_id: u64,
-    deleted_at: u64,
-) -> Result<Option<Invitation>, String> {
+pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &str) -> Result<Option<Vec<Invitation>>, String> {
     let mut stmt = match conn.prepare(
         "
-        UPDATE
-            invitations
-        SET
-            deleted_at = ?1
-        WHERE
-            id = ?2
-        RETURNING
+        SELECT
             *
-    ",
+        FROM
+            invitations
+        WHERE
+            contact_type = ?1
+            AND contact_content = ?2
+        ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut invitations = match stmt.query_map((deleted_at, invitation_id), get_invitation_from_row)
-    {
+    let mut invitation_iter = match stmt.query_map((contact_type, contact_type), get_invitation_from_row) {
         Ok(invitations) => invitations,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(invitation_maybe) = invitations.next() {
-        if let Ok(invitation) = invitation_maybe {
-            return Ok(Some(invitation));
-        }
-    }
+    // if let Some(invitation_maybe) = invitations.next() {
+    //     if let Ok(invitation) = invitation_maybe {
+    //         return Ok(Some(invitation));
+    //     }
+    // }
 
     Ok(None)
 }
 
-pub fn dangerously_delete(
-    conn: Connection,
-    invitation_id: u64,
-) -> Result<Option<Invitation>, String> {
-    let mut stmt = match conn.prepare(
-        "
-        DELETE
-            invitations
-        WHERE
-            id = ?1
-        RETURNING
-            *
-    ",
-    ) {
-        Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
-    };
+// pub fn delete(
+//     conn: Connection,
+//     invitation_id: u64,
+//     deleted_at: u64,
+// ) -> Result<Option<Invitation>, String> {
+//     let mut stmt = match conn.prepare(
+//         "
+//         UPDATE
+//             invitations
+//         SET
+//             deleted_at = ?1
+//         WHERE
+//             id = ?2
+//         RETURNING
+//             *
+//     ",
+//     ) {
+//         Ok(stmt) => stmt,
+//         _ => return Err("cound not prepare statement".to_string()),
+//     };
 
-    let mut invitations = match stmt.query_map([invitation_id], get_invitation_from_row) {
-        Ok(invitations) => invitations,
-        Err(e) => return Err(e.to_string()),
-    };
+//     let mut invitations = match stmt.query_map((deleted_at, invitation_id), get_invitation_from_row)
+//     {
+//         Ok(invitations) => invitations,
+//         Err(e) => return Err(e.to_string()),
+//     };
 
-    if let Some(invitation_maybe) = invitations.next() {
-        if let Ok(invitation) = invitation_maybe {
-            return Ok(Some(invitation));
-        }
-    }
+//     if let Some(invitation_maybe) = invitations.next() {
+//         if let Ok(invitation) = invitation_maybe {
+//             return Ok(Some(invitation));
+//         }
+//     }
 
-    Ok(None)
-}
+//     Ok(None)
+// }
+
+// pub fn dangerously_delete(
+//     conn: Connection,
+//     invitation_id: u64,
+// ) -> Result<Option<Invitation>, String> {
+//     let mut stmt = match conn.prepare(
+//         "
+//         DELETE
+//             invitations
+//         WHERE
+//             id = ?1
+//         RETURNING
+//             *
+//     ",
+//     ) {
+//         Ok(stmt) => stmt,
+//         _ => return Err("cound not prepare statement".to_string()),
+//     };
+
+//     let mut invitations = match stmt.query_map([invitation_id], get_invitation_from_row) {
+//         Ok(invitations) => invitations,
+//         Err(e) => return Err(e.to_string()),
+//     };
+
+//     if let Some(invitation_maybe) = invitations.next() {
+//         if let Ok(invitation) = invitation_maybe {
+//             return Ok(Some(invitation));
+//         }
+//     }
+
+//     Ok(None)
+// }
