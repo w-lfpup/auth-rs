@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Invitation {
+pub struct Signups {
     id: u64,
     session: u64,
     session_length_ms: u64,

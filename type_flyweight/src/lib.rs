@@ -1,1 +1,1 @@
-pub mod invitations;
+pub mod signups;
