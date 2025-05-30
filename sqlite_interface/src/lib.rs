@@ -1,1 +1,1 @@
-pub mod invitation_actions;
+pub mod signups;

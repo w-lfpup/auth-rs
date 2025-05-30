@@ -1,26 +1,14 @@
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
-// use serde::{Deserialize, Serialize};
 
-// 1 DAY as ms
-const INVITATION_LENGTH_MS: usize = 2629800000;
+use type_flyweight::signups::Signup;
 
-// #[derive(Clone, Serialize, Deserialize, Debug)]
-// pub struct Invitation {
-//     id: u64,
-//     session: u64,
-//     session_length_ms: u64,
-//     contact_type: u64,
-//     contact_content: String,
-//     deleted_at: Option<u64>,
-// }
-
-fn get_invitation_from_row(row: &Row) -> Result<Invitation, RusqliteError> {
-    Ok(Invitation {
+fn get_signup_from_row(row: &Row) -> Result<Signup, RusqliteError> {
+    Ok(Signup {
         id: row.get(0)?,
         session: row.get(1)?,
         session_length_ms: row.get(2)?,
-        contact_type: row.get(3)?,
+        contact_kind_id: row.get(3)?,
         contact_content: row.get(4)?,
         deleted_at: row.get(5)?,
     })
@@ -28,11 +16,11 @@ fn get_invitation_from_row(row: &Row) -> Result<Invitation, RusqliteError> {
 
 pub fn create_table(conn: Connection) -> Result<(), String> {
     let results = conn.execute(
-        "CREATE TABLE IF NOT EXISTS invitations (
-            id INTEGER PRIMARY KEY UNIQUE,
+        "CREATE TABLE IF NOT EXISTS signups (
+            id INTEGER PRIMARY KEY,
             session INTEGER NOT NULL,
             session_length_ms INTEGER NOT NULL,
-            contact_type INTEGER NOT NULL,
+            contact_kind_id INTEGER NOT NULL,
             contact_content TEXT KEY NOT NULL,
             deleted_at INTEGER
         )",
@@ -40,7 +28,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
     );
 
     if let Err(e) = results {
-        return Err("invitations table error: \n".to_string() + &e.to_string());
+        return Err("signups table error: \n".to_string() + &e.to_string());
     }
 
     Ok(())
@@ -48,18 +36,18 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
 
 pub fn create(
     conn: Connection,
-    invitation_id: u64,
-    contact_type: u64,
+    signup_id: u64,
+    contact_kind_id: u64,
     contact_content: &str,
     session_length_ms: u32,
-) -> Result<Option<Invitation>, String> {
+) -> Result<Option<Signup>, String> {
     let mut rng = rand::rng();
     let session: u64 = rng.random();
 
     let mut stmt = match conn.prepare(
         "
-        INSERT INTO invitations
-            (id, session, session_length_ms, contact_type, contact_content)
+        INSERT INTO signups
+            (id, session, session_length_ms, contact_kind, contact_content)
         VALUES
             (?1, ?2, ?3, ?4, ?5)
         RETURNING
@@ -70,22 +58,22 @@ pub fn create(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut invitations = match stmt.query_map(
+    let mut signups = match stmt.query_map(
         (
-            invitation_id,
+            signup_id,
             session,
             session_length_ms,
-            contact_type,
+            contact_kind_id,
             contact_content,
         ),
-        get_invitation_from_row,
+        get_signup_from_row,
     ) {
-        Ok(invitations) => invitations,
+        Ok(signups) => signups,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(invitation_maybe) = invitations.next() {
-        if let Ok(invitation) = invitation_maybe {
+    if let Some(signup_maybe) = signups.next() {
+        if let Ok(invitation) = signup_maybe {
             return Ok(Some(invitation));
         }
     }
@@ -93,13 +81,13 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(conn: Connection, invitation_id: u64) -> Result<Option<Invitation>, String> {
+pub fn read(conn: Connection, signup_id: u64) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
             *
         FROM
-            invitations
+            signups
         WHERE
             id = ?1
         ",
@@ -108,13 +96,13 @@ pub fn read(conn: Connection, invitation_id: u64) -> Result<Option<Invitation>, 
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut invitations = match stmt.query_map([invitation_id], get_invitation_from_row) {
-        Ok(invitations) => invitations,
+    let mut signups = match stmt.query_map([signup_id], get_signup_from_row) {
+        Ok(signups) => signups,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(invitation_maybe) = invitations.next() {
-        if let Ok(invitation) = invitation_maybe {
+    if let Some(signup_maybe) = signups.next() {
+        if let Ok(invitation) = signup_maybe {
             return Ok(Some(invitation));
         }
     }
@@ -122,15 +110,19 @@ pub fn read(conn: Connection, invitation_id: u64) -> Result<Option<Invitation>, 
     Ok(None)
 }
 
-pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &str) -> Result<Option<Vec<Invitation>>, String> {
+pub fn read_by_contact(
+    conn: Connection,
+    contact_kind_id: u64,
+    contact_content: &str,
+) -> Result<Vec<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
             *
         FROM
-            invitations
+            signups
         WHERE
-            contact_type = ?1
+            contact_kind_id = ?1
             AND contact_content = ?2
         ",
     ) {
@@ -138,29 +130,31 @@ pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &st
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut invitation_iter = match stmt.query_map((contact_type, contact_type), get_invitation_from_row) {
-        Ok(invitations) => invitations,
+    let signup_iter = match stmt.query_map((contact_kind_id, contact_content), get_signup_from_row)
+    {
+        Ok(signups) => signups,
         Err(e) => return Err(e.to_string()),
     };
 
-    // if let Some(invitation_maybe) = invitations.next() {
-    //     if let Ok(invitation) = invitation_maybe {
-    //         return Ok(Some(invitation));
-    //     }
-    // }
+    let mut signups: Vec<Signup> = Vec::new();
+    for signup_maybe in signup_iter {
+        if let Ok(signup) = signup_maybe {
+            signups.push(signup);
+        }
+    }
 
-    Ok(None)
+    Ok(signups)
 }
 
 // pub fn delete(
 //     conn: Connection,
-//     invitation_id: u64,
+//     signup_id: u64,
 //     deleted_at: u64,
-// ) -> Result<Option<Invitation>, String> {
+// ) -> Result<Option<Signup>, String> {
 //     let mut stmt = match conn.prepare(
 //         "
 //         UPDATE
-//             invitations
+//             signups
 //         SET
 //             deleted_at = ?1
 //         WHERE
@@ -173,14 +167,14 @@ pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &st
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut invitations = match stmt.query_map((deleted_at, invitation_id), get_invitation_from_row)
+//     let mut signups = match stmt.query_map((deleted_at, signup_id), get_signup_from_row)
 //     {
-//         Ok(invitations) => invitations,
+//         Ok(signups) => signups,
 //         Err(e) => return Err(e.to_string()),
 //     };
 
-//     if let Some(invitation_maybe) = invitations.next() {
-//         if let Ok(invitation) = invitation_maybe {
+//     if let Some(signup_maybe) = signups.next() {
+//         if let Ok(invitation) = signup_maybe {
 //             return Ok(Some(invitation));
 //         }
 //     }
@@ -190,12 +184,12 @@ pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &st
 
 // pub fn dangerously_delete(
 //     conn: Connection,
-//     invitation_id: u64,
-// ) -> Result<Option<Invitation>, String> {
+//     signup_id: u64,
+// ) -> Result<Option<Signup>, String> {
 //     let mut stmt = match conn.prepare(
 //         "
 //         DELETE
-//             invitations
+//             signups
 //         WHERE
 //             id = ?1
 //         RETURNING
@@ -206,16 +200,18 @@ pub fn read_by_contact(conn: Connection, contact_type: u64, contact_content: &st
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut invitations = match stmt.query_map([invitation_id], get_invitation_from_row) {
-//         Ok(invitations) => invitations,
+//     let mut signups = match stmt.query_map([signup_id], get_signup_from_row) {
+//         Ok(signups) => signups,
 //         Err(e) => return Err(e.to_string()),
 //     };
 
-//     if let Some(invitation_maybe) = invitations.next() {
-//         if let Ok(invitation) = invitation_maybe {
+//     if let Some(signup_maybe) = signups.next() {
+//         if let Ok(invitation) = signup_maybe {
 //             return Ok(Some(invitation));
 //         }
 //     }
 
 //     Ok(None)
 // }
+
+// dangerously_delete_all_stale

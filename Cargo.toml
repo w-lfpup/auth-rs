@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ "config", "sqlite_connection_pool" ]
+members = ["type_flyweight", "sqlite_interface" ]
 
 [workspace.dependencies]
 bytes = "1"
