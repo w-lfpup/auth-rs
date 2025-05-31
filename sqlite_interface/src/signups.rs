@@ -1,4 +1,3 @@
-use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
 use type_flyweight::signups::Signup;
@@ -36,14 +35,12 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
 
 pub fn create(
     conn: Connection,
-    signup_id: u64,
+    id: u64,
+    session: u64,
     contact_kind_id: u64,
     contact_content: &str,
     session_length_ms: u32,
 ) -> Result<Option<Signup>, String> {
-    let mut rng = rand::rng();
-    let session: u64 = rng.random();
-
     let mut stmt = match conn.prepare(
         "
         INSERT INTO signups
@@ -60,7 +57,7 @@ pub fn create(
 
     let mut signups = match stmt.query_map(
         (
-            signup_id,
+            id,
             session,
             session_length_ms,
             contact_kind_id,
