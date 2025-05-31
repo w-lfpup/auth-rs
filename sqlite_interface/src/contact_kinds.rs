@@ -3,11 +3,10 @@ use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
 use type_flyweight::contacts::ContactKind;
 
-// 1 DAY as ms
-const SIGNUP_LENGTH_MS: usize = 2629800000;
+// This table doesn't really scale, very shallow
 
-fn get_contact_kind_from_row(row: &Row) -> Result<Signup, RusqliteError> {
-    Ok(Signup {
+fn get_contact_kind_from_row(row: &Row) -> Result<ContactKind, RusqliteError> {
+    Ok(ContactKind {
         id: row.get(0)?,
         kind: row.get(1)?,
         deleted_at: row.get(2)?,
@@ -31,11 +30,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(
-    conn: Connection,
-    id: u64,
-    content: &str,
-) -> Result<Option<Signup>, String> {
+pub fn create(conn: Connection, id: u64, content: &str) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds
@@ -50,13 +45,7 @@ pub fn create(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind_iter = match stmt.query_map(
-        (
-            id,
-            session,
-        ),
-        get_contact_kind_from_row,
-    ) {
+    let mut contact_kind_iter = match stmt.query_map((id, content), get_contact_kind_from_row) {
         Ok(kind_iter) => kind_iter,
         Err(e) => return Err(e.to_string()),
     };
@@ -70,7 +59,7 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(conn: Connection, id: u64) -> Result<Option<Signup>, String> {
+pub fn read(conn: Connection, id: u64) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -91,15 +80,15 @@ pub fn read(conn: Connection, id: u64) -> Result<Option<Signup>, String> {
     };
 
     if let Some(contact_kind_maybe) = contact_kind.next() {
-        if let Ok(invitation) = contact_kind_maybe {
-            return Ok(Some(invitation));
+        if let Ok(contact) = contact_kind_maybe {
+            return Ok(Some(contact));
         }
     }
 
     Ok(None)
 }
 
-pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<Vec<Signup>>, String> {
+pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -132,7 +121,7 @@ pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<Vec<Signup>>, 
 //     conn: Connection,
 //     contact_kind_id: u64,
 //     deleted_at: u64,
-// ) -> Result<Option<Signup>, String> {
+// ) -> Result<Option<ContactKind>, String> {
 //     let mut stmt = match conn.prepare(
 //         "
 //         UPDATE
@@ -167,7 +156,7 @@ pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<Vec<Signup>>, 
 // pub fn dangerously_delete(
 //     conn: Connection,
 //     contact_kind_id: u64,
-// ) -> Result<Option<Signup>, String> {
+// ) -> Result<Option<ContactKind>, String> {
 //     let mut stmt = match conn.prepare(
 //         "
 //         DELETE
