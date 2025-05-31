@@ -21,7 +21,7 @@ impl AuthDb {
         // add invitations
 
         Ok(AuthDb {
-            origin_time_ms: origin_time_ms.clone(),
+            origin_time_ms: origin_time_ms,
             connector: connector,
         })
     }

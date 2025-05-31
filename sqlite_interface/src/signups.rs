@@ -37,9 +37,9 @@ pub fn create(
     conn: Connection,
     id: u64,
     session: u64,
+    session_length_ms: u32,
     contact_kind_id: u64,
     contact_content: &str,
-    session_length_ms: u32,
 ) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
