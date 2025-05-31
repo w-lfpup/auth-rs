@@ -1,4 +1,3 @@
-use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
 use type_flyweight::contacts::Contact;
@@ -7,7 +6,7 @@ use type_flyweight::contacts::Contact;
 // This requires queries at scale to "get" all possible from all shards
 // if searching by contact
 
-fn get_contact_kind_from_row(row: &Row) -> Result<Contact, RusqliteError> {
+fn get_contact_from_row(row: &Row) -> Result<Contact, RusqliteError> {
     Ok(Contact {
         id: row.get(0)?,
         people_id: row.get(1)?,
@@ -61,17 +60,17 @@ pub fn create(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind_iter = match stmt.query_map(
+    let mut contact_iter = match stmt.query_map(
         (id, people_id, contact_kind_id, content, verified_at),
-        get_contact_kind_from_row,
+        get_contact_from_row,
     ) {
-        Ok(kind_iter) => kind_iter,
+        Ok(contact_iter) => contact_iter,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(contact_kind_maybe) = contact_kind_iter.next() {
-        if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(Some(contact_kind));
+    if let Some(contact_maybe) = contact_iter.next() {
+        if let Ok(contact) = contact_maybe {
+            return Ok(Some(contact));
         }
     }
 
@@ -93,14 +92,14 @@ pub fn read(conn: Connection, id: u64) -> Result<Option<Contact>, String> {
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind = match stmt.query_map([id], get_contact_kind_from_row) {
-        Ok(contact_kind) => contact_kind,
+    let mut contact_iter = match stmt.query_map([id], get_contact_from_row) {
+        Ok(contact_iter) => contact_iter,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(contact_kind_maybe) = contact_kind.next() {
-        if let Ok(invitation) = contact_kind_maybe {
-            return Ok(Some(invitation));
+    if let Some(contact_maybe) = contact_iter.next() {
+        if let Ok(contact) = contact_maybe {
+            return Ok(Some(contact));
         }
     }
 
@@ -128,15 +127,14 @@ pub fn read_by_kind_id_and_content(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind_iter =
-        match stmt.query_map((contact_kind_id, content), get_contact_kind_from_row) {
-            Ok(contact_kind) => contact_kind,
-            Err(e) => return Err(e.to_string()),
-        };
+    let mut contact_iter = match stmt.query_map((contact_kind_id, content), get_contact_from_row) {
+        Ok(contact_iter) => contact_iter,
+        Err(e) => return Err(e.to_string()),
+    };
 
-    if let Some(contact_kind_maybe) = contact_kind_iter.next() {
-        if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(Some(contact_kind));
+    if let Some(contact_maybe) = contact_iter.next() {
+        if let Ok(contact) = contact_maybe {
+            return Ok(Some(contact));
         }
     }
 
@@ -164,14 +162,14 @@ pub fn read_by_kind_id_and_content(
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut contact_kind = match stmt.query_map((deleted_at, contact_kind_id), get_contact_kind_from_row)
+//     let mut contact_kind = match stmt.query_map((deleted_at, contact_kind_id), get_contact_from_row)
 //     {
 //         Ok(contact_kind) => contact_kind,
 //         Err(e) => return Err(e.to_string()),
 //     };
 
-//     if let Some(contact_kind_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_kind_maybe {
+//     if let Some(contact_maybe) = contact_kind.next() {
+//         if let Ok(invitation) = contact_maybe {
 //             return Ok(Some(invitation));
 //         }
 //     }
@@ -197,13 +195,13 @@ pub fn read_by_kind_id_and_content(
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut contact_kind = match stmt.query_map([contact_kind_id], get_contact_kind_from_row) {
+//     let mut contact_kind = match stmt.query_map([contact_kind_id], get_contact_from_row) {
 //         Ok(contact_kind) => contact_kind,
 //         Err(e) => return Err(e.to_string()),
 //     };
 
-//     if let Some(contact_kind_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_kind_maybe {
+//     if let Some(contact_maybe) = contact_kind.next() {
+//         if let Ok(invitation) = contact_maybe {
 //             return Ok(Some(invitation));
 //         }
 //     }
