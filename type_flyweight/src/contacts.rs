@@ -11,7 +11,8 @@ pub struct ContactKind {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Contact {
     pub id: u64,
-    pub kind_id: u64,
+    pub people_id: u64,
+    pub contact_kind_id: u64,
     pub content: String,
     pub verified_at: Option<u64>,
     pub deleted_at: Option<u64>,
