@@ -12,7 +12,7 @@ fn get_contact_kind_from_row(row: &Row) -> Result<ContactKind, RusqliteError> {
     })
 }
 
-pub fn create_table(conn: Connection) -> Result<(), String> {
+pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS contact_kinds (
             id INTEGER PRIMARY KEY,
@@ -29,7 +29,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(conn: Connection, id: u64, content: &str) -> Result<Option<ContactKind>, String> {
+pub fn create(conn: &mut Connection, id: u64, content: &str) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds
@@ -58,7 +58,7 @@ pub fn create(conn: Connection, id: u64, content: &str) -> Result<Option<Contact
     Ok(None)
 }
 
-pub fn read(conn: Connection, id: u64) -> Result<Option<ContactKind>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -87,7 +87,7 @@ pub fn read(conn: Connection, id: u64) -> Result<Option<ContactKind>, String> {
     Ok(None)
 }
 
-pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<ContactKind>, String> {
+pub fn read_by_kind(conn: &mut Connection, kind: u64) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -117,7 +117,7 @@ pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<ContactKind>, 
 }
 
 // pub fn delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     contact_kind_id: u64,
 //     deleted_at: u64,
 // ) -> Result<Option<ContactKind>, String> {
@@ -153,7 +153,7 @@ pub fn read_by_kind(conn: Connection, kind: u64) -> Result<Option<ContactKind>, 
 // }
 
 // pub fn dangerously_delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     contact_kind_id: u64,
 // ) -> Result<Option<ContactKind>, String> {
 //     let mut stmt = match conn.prepare(

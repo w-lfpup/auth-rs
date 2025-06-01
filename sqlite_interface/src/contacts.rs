@@ -17,7 +17,7 @@ fn get_contact_from_row(row: &Row) -> Result<Contact, RusqliteError> {
     })
 }
 
-pub fn create_table(conn: Connection) -> Result<(), String> {
+pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS contacts (
             id INTEGER PRIMARY KEY,
@@ -39,7 +39,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
 }
 
 pub fn create(
-    conn: Connection,
+    conn: &mut Connection,
     id: u64,
     people_id: u64,
     contact_kind_id: u64,
@@ -77,7 +77,7 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(conn: Connection, id: u64) -> Result<Option<Contact>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Contact>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -107,7 +107,7 @@ pub fn read(conn: Connection, id: u64) -> Result<Option<Contact>, String> {
 }
 
 pub fn read_by_kind_id_and_content(
-    conn: Connection,
+    conn: &mut Connection,
     contact_kind_id: u64,
     content: &str,
 ) -> Result<Option<Contact>, String> {
@@ -142,7 +142,7 @@ pub fn read_by_kind_id_and_content(
 }
 
 // pub fn delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     contact_kind_id: u64,
 //     deleted_at: u64,
 // ) -> Result<Option<Contact>, String> {
@@ -178,7 +178,7 @@ pub fn read_by_kind_id_and_content(
 // }
 
 // pub fn dangerously_delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     contact_kind_id: u64,
 // ) -> Result<Option<Contact>, String> {
 //     let mut stmt = match conn.prepare(

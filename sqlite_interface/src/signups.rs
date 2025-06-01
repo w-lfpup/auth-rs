@@ -13,7 +13,7 @@ fn get_signup_from_row(row: &Row) -> Result<Signup, RusqliteError> {
     })
 }
 
-pub fn create_table(conn: Connection) -> Result<(), String> {
+pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS signups (
             id INTEGER PRIMARY KEY,
@@ -34,7 +34,7 @@ pub fn create_table(conn: Connection) -> Result<(), String> {
 }
 
 pub fn create(
-    conn: Connection,
+    conn: &mut Connection,
     id: u64,
     session: u64,
     session_length_ms: u32,
@@ -78,7 +78,7 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(conn: Connection, signup_id: u64) -> Result<Option<Signup>, String> {
+pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -108,7 +108,7 @@ pub fn read(conn: Connection, signup_id: u64) -> Result<Option<Signup>, String> 
 }
 
 pub fn read_by_contact(
-    conn: Connection,
+    conn: &mut Connection,
     contact_kind_id: u64,
     contact_content: &str,
 ) -> Result<Vec<Signup>, String> {
@@ -144,7 +144,7 @@ pub fn read_by_contact(
 }
 
 // pub fn delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     signup_id: u64,
 //     deleted_at: u64,
 // ) -> Result<Option<Signup>, String> {
@@ -180,7 +180,7 @@ pub fn read_by_contact(
 // }
 
 // pub fn dangerously_delete(
-//     conn: Connection,
+//     conn: &mut Connection,
 //     signup_id: u64,
 // ) -> Result<Option<Signup>, String> {
 //     let mut stmt = match conn.prepare(
