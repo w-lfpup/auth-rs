@@ -16,7 +16,7 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS contact_kinds (
             id INTEGER PRIMARY KEY,
-            kind TEXT KEY NOT NULL UNIQUE,
+            kind TEXT NOT NULL UNIQUE,
             deleted_at INTEGER
         )",
         (),
@@ -29,7 +29,11 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(conn: &mut Connection, id: u64, content: &str) -> Result<Option<ContactKind>, String> {
+pub fn create(
+    conn: &mut Connection,
+    id: u64,
+    content: &str,
+) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds

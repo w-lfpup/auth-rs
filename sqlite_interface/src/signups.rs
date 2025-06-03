@@ -5,8 +5,7 @@ use type_flyweight::signups::Signup;
 fn get_signup_from_row(row: &Row) -> Result<Signup, RusqliteError> {
     Ok(Signup {
         id: row.get(0)?,
-        session: row.get(1)?,
-        session_length_ms: row.get(2)?,
+        token: row.get(1)?,
         contact_kind_id: row.get(3)?,
         contact_content: row.get(4)?,
         deleted_at: row.get(5)?,
@@ -17,8 +16,7 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS signups (
             id INTEGER PRIMARY KEY,
-            session INTEGER NOT NULL,
-            session_length_ms INTEGER NOT NULL,
+            token INTEGER NOT NULL,
             contact_kind_id INTEGER NOT NULL,
             contact_content TEXT KEY NOT NULL,
             deleted_at INTEGER
@@ -36,17 +34,16 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
 pub fn create(
     conn: &mut Connection,
     id: u64,
-    session: u64,
-    session_length_ms: u32,
+    token: u64,
     contact_kind_id: u64,
     contact_content: &str,
 ) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO signups
-            (id, session, session_length_ms, contact_kind, contact_content)
+            (id, token, contact_kind, contact_content)
         VALUES
-            (?1, ?2, ?3, ?4, ?5)
+            (?1, ?2, ?3, ?4)
         RETURNING
             *
     ",
@@ -56,13 +53,7 @@ pub fn create(
     };
 
     let mut signups = match stmt.query_map(
-        (
-            id,
-            session,
-            session_length_ms,
-            contact_kind_id,
-            contact_content,
-        ),
+        (id, token, contact_kind_id, contact_content),
         get_signup_from_row,
     ) {
         Ok(signups) => signups,

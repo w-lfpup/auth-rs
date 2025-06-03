@@ -19,7 +19,7 @@ const INVITATION_LENGTH_MS: usize = 2629800000;
 // create()
 // returns hexidecimal string
 pub fn create_signup_session(
-    conn: Connection,
+    conn: &mut Connection,
     id: u64,
     session_length_ms: u64,
     contact_type: u64,
@@ -38,7 +38,7 @@ pub fn create_signup_session(
 // invitation has been used (people_id matches invitation_id)
 // success
 
-pub fn create_person_and_contact_from_signup_session(conn: Connection, session_base64: &str) -> Result<(), String> {
+pub fn create_person_and_contact_from_signup_session(conn: &mut Connection, session_base64: &str) -> Result<(), String> {
     // get id, session
     // query for invitation
     // if session return

@@ -21,8 +21,8 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
         "CREATE TABLE IF NOT EXISTS contacts (
             id INTEGER PRIMARY KEY,
-            people_id INTEGER KEY NOT NULL,
-            contact_kind_id INTEGER KEY NOT NULL,
+            people_id INTEGER NOT NULL,
+            contact_kind_id INTEGER NOT NULL,
             content TEXT NOT NULL,
             verified_at INTEGER,
             deleted_at INTEGER,
