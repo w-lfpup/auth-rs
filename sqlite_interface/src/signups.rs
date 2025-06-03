@@ -61,8 +61,8 @@ pub fn create(
     };
 
     if let Some(signup_maybe) = signups.next() {
-        if let Ok(invitation) = signup_maybe {
-            return Ok(Some(invitation));
+        if let Ok(singup) = signup_maybe {
+            return Ok(Some(singup));
         }
     }
 
@@ -90,8 +90,8 @@ pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, Str
     };
 
     if let Some(signup_maybe) = signups.next() {
-        if let Ok(invitation) = signup_maybe {
-            return Ok(Some(invitation));
+        if let Ok(singup) = signup_maybe {
+            return Ok(Some(singup));
         }
     }
 
@@ -162,8 +162,8 @@ pub fn read_by_contact(
 //     };
 
 //     if let Some(signup_maybe) = signups.next() {
-//         if let Ok(invitation) = signup_maybe {
-//             return Ok(Some(invitation));
+//         if let Ok(singup) = signup_maybe {
+//             return Ok(Some(singup));
 //         }
 //     }
 
@@ -194,8 +194,8 @@ pub fn read_by_contact(
 //     };
 
 //     if let Some(signup_maybe) = signups.next() {
-//         if let Ok(invitation) = signup_maybe {
-//             return Ok(Some(invitation));
+//         if let Ok(singup) = signup_maybe {
+//             return Ok(Some(singup));
 //         }
 //     }
 

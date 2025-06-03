@@ -2,7 +2,7 @@ use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
 use type_flyweight::sessions::PublicSession;
 
-fn get_signup_from_row(row: &Row) -> Result<PublicSession, RusqliteError> {
+fn get_public_session_from_row(row: &Row) -> Result<PublicSession, RusqliteError> {
     Ok(PublicSession {
         id: row.get(0)?,
         people_id: row.get(1)?,
@@ -52,11 +52,13 @@ pub fn create(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut sessions_iter =
-        match stmt.query_map((id, people_id, token, session_id), get_signup_from_row) {
-            Ok(sessions) => sessions,
-            Err(e) => return Err(e.to_string()),
-        };
+    let mut sessions_iter = match stmt.query_map(
+        (id, people_id, token, session_id),
+        get_public_session_from_row,
+    ) {
+        Ok(sessions) => sessions,
+        Err(e) => return Err(e.to_string()),
+    };
 
     if let Some(session_maybe) = sessions_iter.next() {
         if let Ok(public_session) = session_maybe {
@@ -85,7 +87,7 @@ pub fn read(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut sessions_iter = match stmt.query_map([public_session_id], get_signup_from_row) {
+    let mut sessions_iter = match stmt.query_map([public_session_id], get_public_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
@@ -117,15 +119,15 @@ pub fn read_by_session_id(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let public_sessions_iter = match stmt.query_map([session_id], get_signup_from_row) {
+    let public_sessions_iter = match stmt.query_map([session_id], get_public_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
 
     let mut sessions: Vec<PublicSession> = Vec::new();
     for session_maybe in public_sessions_iter {
-        if let Ok(signup) = session_maybe {
-            sessions.push(signup);
+        if let Ok(public_session) = session_maybe {
+            sessions.push(public_session);
         }
     }
 
@@ -150,15 +152,15 @@ pub fn read_by_people_id(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let public_sessions_iter = match stmt.query_map([people_id], get_signup_from_row) {
+    let public_sessions_iter = match stmt.query_map([people_id], get_public_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
 
     let mut sessions: Vec<PublicSession> = Vec::new();
     for session_maybe in public_sessions_iter {
-        if let Ok(signup) = session_maybe {
-            sessions.push(signup);
+        if let Ok(public_session) = session_maybe {
+            sessions.push(public_session);
         }
     }
 
@@ -186,7 +188,7 @@ pub fn read_by_people_id(
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut sessions = match stmt.query_map((deleted_at, public_session_id), get_signup_from_row)
+//     let mut sessions = match stmt.query_map((deleted_at, public_session_id), get_public_session_from_row)
 //     {
 //         Ok(sessions) => sessions,
 //         Err(e) => return Err(e.to_string()),
@@ -219,7 +221,7 @@ pub fn read_by_people_id(
 //         _ => return Err("cound not prepare statement".to_string()),
 //     };
 
-//     let mut sessions = match stmt.query_map([public_session_id], get_signup_from_row) {
+//     let mut sessions = match stmt.query_map([public_session_id], get_public_session_from_row) {
 //         Ok(sessions) => sessions,
 //         Err(e) => return Err(e.to_string()),
 //     };
