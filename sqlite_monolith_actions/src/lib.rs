@@ -1,7 +1,29 @@
+use serde::{Deserialize, Serialize};
+use serde_json;
 use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 use connector::Connector;
 
 // An intentionally limited, structured, and journey driven API
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct SqliteSettings {
+    db_path: PathBuf,
+    max_connections: u64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct AuthSettingsSettings {
+    origin_timestamp_ms: u64,
+    logical_volume_base: u64,
+    logical_volume_length: u64,
+    signup_session_length_ms: u64,
+    session_length_ms: u64,
+    public_session_length_ms: u64,
+    public_session_stale_length_ms: u64,
+}
+
+// Auth needs connection Pool
+// Auth needs Snowprints
 
 // origin time duration
 pub struct AuthDb {
@@ -18,7 +40,6 @@ impl AuthDb {
         };
 
         // add invitations
-
         Ok(AuthDb {
             origin_time_ms: origin_time_ms,
             connector: connector,
@@ -27,7 +48,6 @@ impl AuthDb {
 }
 
 // UTILITY functions
-
 pub fn create_snowprints(
     origin_time_ms: u64,
     volume_params: Option<(u64, u64)>,

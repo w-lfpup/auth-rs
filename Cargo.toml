@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["config", "type_flyweight", "sqlite_interface", "sqlite_monolith_setup" ]
+members = ["type_flyweight", "sqlite_connection_pool", "sqlite_interface", "sqlite_monolith_setup" ]
 
 [workspace.dependencies]
 bytes = "1"
