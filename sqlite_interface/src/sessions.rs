@@ -6,7 +6,7 @@ fn get_session_from_row(row: &Row) -> Result<Session, RusqliteError> {
     Ok(Session {
         id: row.get(0)?,
         people_id: row.get(1)?,
-        deleted_at: row.get(5)?,
+        deleted_at: row.get(2)?,
     })
 }
 

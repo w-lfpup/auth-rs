@@ -1,0 +1,13 @@
+{
+    "contact_types": [
+        "email",
+        "phone"
+    ],
+    "people": [
+        {
+            "contact_type": "email",
+            "contact_content": "myemail@furry.net",
+            "password": "superawesome"
+        }
+    ]
+}

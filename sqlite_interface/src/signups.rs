@@ -6,9 +6,9 @@ fn get_signup_from_row(row: &Row) -> Result<Signup, RusqliteError> {
     Ok(Signup {
         id: row.get(0)?,
         token: row.get(1)?,
-        contact_kind_id: row.get(3)?,
-        contact_content: row.get(4)?,
-        deleted_at: row.get(5)?,
+        contact_kind_id: row.get(2)?,
+        contact_content: row.get(3)?,
+        deleted_at: row.get(4)?,
     })
 }
 

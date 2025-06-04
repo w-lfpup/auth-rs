@@ -4,6 +4,8 @@ use type_flyweight::contacts::ContactKind;
 
 // This table doesn't really scale, very shallow
 
+// Has a unique property so a general query should consider map->reduce form multiple servers
+
 fn get_contact_kind_from_row(row: &Row) -> Result<ContactKind, RusqliteError> {
     Ok(ContactKind {
         id: row.get(0)?,

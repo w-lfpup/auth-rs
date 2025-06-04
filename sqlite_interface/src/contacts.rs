@@ -11,9 +11,9 @@ fn get_contact_from_row(row: &Row) -> Result<Contact, RusqliteError> {
         id: row.get(0)?,
         people_id: row.get(1)?,
         contact_kind_id: row.get(2)?,
-        content: row.get(1)?,
-        verified_at: row.get(1)?,
-        deleted_at: row.get(1)?,
+        content: row.get(3)?,
+        verified_at: row.get(4)?,
+        deleted_at: row.get(5)?,
     })
 }
 

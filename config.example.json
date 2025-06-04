@@ -1,5 +1,15 @@
 {
-    "auth": {
-        "sqlite_path": "auth.sqlite"
+    "sqlite": {
+        "authentication_path": "./authenticate_db.sqlite",
+        "authorization_path": "./authorize_db.sqlite"
+    },
+    "auth_settings": {
+        "logical_volume_base": 0,
+        "logical_volume_length": 8192,
+        "ip_address_rate_limit_per_minute": 256,
+        "max_guest_session_per_minute": 512,
+        "max_guest_session_creation_per_minute": 64,
+        "max_public_session_rate_limit": 1024,
+        "max_public_session_creation_rate_limit": 64
     }
 }
