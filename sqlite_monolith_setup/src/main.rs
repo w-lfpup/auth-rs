@@ -21,7 +21,6 @@ fn main() -> Result<(), String> {
 
     // get args
     let args: Vec<String> = env::args().collect();
-
     let first_arg = match args.get(0) {
         Some(arg) => arg,
         _ => return Err("no arguments provided".to_string()),
@@ -29,6 +28,19 @@ fn main() -> Result<(), String> {
     println!("{}", first_arg);
 
     // if arg create_tables ./config
+    Ok(())
+}
+
+pub fn set_journal_mode_to_WAL2(conn: &mut Connection) -> Result<(), String> {
+    let results = conn.execute(
+        "PRAGMA journal_mode = wal2",
+        (),
+    );
+
+    if let Err(e) = results {
+        return Err("error setting journal mode to WAL2: \n".to_string() + &e.to_string());
+    }
+
     Ok(())
 }
 

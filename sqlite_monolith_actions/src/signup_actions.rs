@@ -39,6 +39,7 @@ pub fn create_signup_session(
 pub fn create_person_and_contact_from_signup_session(
     conn: &mut Connection,
     session_base64: &str,
+    password: &str,
     session_length_ms: u64,
 ) -> Result<(), String> {
     // get id, session
