@@ -7,10 +7,12 @@
 // input base64:base64, password, create contact type, create people entry
 
 // EMAIL INVITATIONS
+use std::sync::{Arc, Mutex};
 
 use base64::engine::general_purpose::URL_SAFE;
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
+use snowprints::Snowprints;
 
 // 1 DAY as ms
 const INVITATION_LENGTH_MS: usize = 2629800000;
@@ -18,9 +20,9 @@ const INVITATION_LENGTH_MS: usize = 2629800000;
 // create()
 // returns hexidecimal string
 pub fn create_signup_session(
+    snowrpints: Arc<Mutex<Snowprints>>,
     conn: &mut Connection,
-    id: u64,
-    contact_type: u64,
+    contact_type: &str,
     contact_content: &str,
 ) -> Result<String, String> {
     // get session length

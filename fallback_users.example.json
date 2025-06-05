@@ -3,11 +3,17 @@
         "email",
         "phone"
     ],
+    "roles": [
+        "admin",
+        "roles_admin",
+        "people_admin"
+    ],
     "people": [
         {
             "contact_type": "email",
             "contact_content": "myemail@furry.net",
-            "password": "superawesome"
+            "password": "superawesome",
+            "roles": ["admin"]
         }
     ]
 }
