@@ -1,22 +1,27 @@
 use rusqlite::Connection;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use serde::{Deserialize, Serialize};
 
-pub struct ConnectionPool {
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct ConnectionPoolParams {
     db_path: PathBuf,
     max_connection_count: usize,
+}
+
+pub struct ConnectionPool {
+    params: ConnectionPoolParams,
     connections: Mutex<Vec<Connection>>,
 }
 
 impl ConnectionPool {
-    pub fn from(db_path: &PathBuf, max_connection_count: usize) -> Result<ConnectionPool, String> {
-        if max_connection_count == 0 {
+    pub fn from(params: ConnectionPoolParams) -> Result<ConnectionPool, String> {
+        if params.max_connection_count == 0 {
             return Err("max connections cannot be 0".to_string());
         }
 
         Ok(ConnectionPool {
-            db_path: db_path.clone(),
-            max_connection_count: max_connection_count,
+            params: params,
             connections: Mutex::new(Vec::new()),
         })
     }
@@ -31,7 +36,7 @@ impl ConnectionPool {
             return Ok(conn);
         }
 
-        match Connection::open(&self.db_path) {
+        match Connection::open(&self.params.db_path) {
             Ok(cn) => Ok(cn),
             Err(e) => return Err(e.to_string()),
         }
@@ -43,7 +48,7 @@ impl ConnectionPool {
             Err(e) => return Err(e.to_string()),
         };
 
-        if connections.len() < self.max_connection_count {
+        if connections.len() < self.params.max_connection_count {
             connections.push(conn);
         }
 
