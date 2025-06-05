@@ -12,7 +12,6 @@ use base64::engine::general_purpose::URL_SAFE;
 use rand::Rng;
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
-
 // 1 DAY as ms
 const INVITATION_LENGTH_MS: usize = 2629800000;
 
@@ -21,7 +20,6 @@ const INVITATION_LENGTH_MS: usize = 2629800000;
 pub fn create_signup_session(
     conn: &mut Connection,
     id: u64,
-    session_length_ms: u64,
     contact_type: u64,
     contact_content: &str,
 ) -> Result<String, String> {
@@ -38,7 +36,11 @@ pub fn create_signup_session(
 // invitation has been used (people_id matches invitation_id)
 // success
 
-pub fn create_person_and_contact_from_signup_session(conn: &mut Connection, session_base64: &str) -> Result<(), String> {
+pub fn create_person_and_contact_from_signup_session(
+    conn: &mut Connection,
+    session_base64: &str,
+    session_length_ms: u64,
+) -> Result<(), String> {
     // get id, session
     // query for invitation
     // if session return

@@ -1,5 +1,5 @@
 [package]
-name = "sqlite_interface"
+name = "sqlite_monolith_actions"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 argon2 = { workspace = true}
-tokio = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 rusqlite = { workspace = true }
 snowprints = { workspace = true }
 rand = { workspace = true }
