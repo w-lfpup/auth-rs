@@ -1,7 +1,7 @@
 // EMAIL INVITATIONS
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub struct Signup {
     pub id: u64,
     pub token: u64,

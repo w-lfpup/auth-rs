@@ -33,7 +33,7 @@ pub fn create(
     conn: &mut Connection,
     id: u64,
     password_hash_results: &str,
-) -> Result<Option<Person>, String> {
+) -> Result<Person, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO people
@@ -45,7 +45,7 @@ pub fn create(
     ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("cound not create person".to_string()),
     };
 
     let mut people_iter = match stmt.query_map((id, password_hash_results), get_person_from_row) {
@@ -55,14 +55,14 @@ pub fn create(
 
     if let Some(person_maybe) = people_iter.next() {
         if let Ok(person) = person_maybe {
-            return Ok(Some(person));
+            return Ok(person);
         }
     }
 
-    Ok(None)
+    Err("failed to create a person".to_string())
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Person>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Person, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -74,7 +74,7 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Person>, String> {
         ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("cound not read person".to_string()),
     };
 
     let mut people_iter = match stmt.query_map([id], get_person_from_row) {
@@ -84,38 +84,9 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Person>, String> {
 
     if let Some(person_maybe) = people_iter.next() {
         if let Ok(person) = person_maybe {
-            return Ok(Some(person));
+            return Ok(person);
         }
     }
 
-    Ok(None)
-}
-
-pub fn read_by_kind(conn: &mut Connection, kind: u64) -> Result<Option<Person>, String> {
-    let mut stmt = match conn.prepare(
-        "
-        SELECT
-            *
-        FROM
-            people
-        WHERE
-            kind = ?1
-        ",
-    ) {
-        Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
-    };
-
-    let mut people_iter = match stmt.query_map([kind], get_person_from_row) {
-        Ok(people) => people,
-        Err(e) => return Err(e.to_string()),
-    };
-
-    if let Some(person_maybe) = people_iter.next() {
-        if let Ok(person) = person_maybe {
-            return Ok(Some(person));
-        }
-    }
-
-    Ok(None)
+    Err("failed to read a person".to_string())
 }

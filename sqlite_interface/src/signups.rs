@@ -37,11 +37,11 @@ pub fn create(
     token: u64,
     contact_kind_id: u64,
     contact_content: &str,
-) -> Result<Option<Signup>, String> {
+) -> Result<Signup, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO signups
-            (id, token, contact_kind, contact_content)
+            (id, token, contact_kind_id, contact_content)
         VALUES
             (?1, ?2, ?3, ?4)
         RETURNING
@@ -49,7 +49,7 @@ pub fn create(
     ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("could not create a signup".to_string()),
     };
 
     let mut signups = match stmt.query_map(
@@ -62,14 +62,14 @@ pub fn create(
 
     if let Some(signup_maybe) = signups.next() {
         if let Ok(singup) = signup_maybe {
-            return Ok(Some(singup));
+            return Ok(singup);
         }
     }
 
-    Ok(None)
+    Err("failed to create a signup".to_string())
 }
 
-pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, String> {
+pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Signup, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -77,6 +77,8 @@ pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, Str
         FROM
             signups
         WHERE
+            deleted_at IS NULL
+            AND
             id = ?1
         ",
     ) {
@@ -91,17 +93,19 @@ pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, Str
 
     if let Some(signup_maybe) = signups.next() {
         if let Ok(singup) = signup_maybe {
-            return Ok(Some(singup));
+            return Ok(singup);
         }
     }
 
-    Ok(None)
+    Err("failed to read signup".to_string())
 }
 
-pub fn read_by_contact(
+pub fn read_all_by_contact(
     conn: &mut Connection,
     contact_kind_id: u64,
     contact_content: &str,
+    offset: usize,
+    limit: usize,
 ) -> Result<Vec<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
@@ -112,14 +116,20 @@ pub fn read_by_contact(
         WHERE
             contact_kind_id = ?1
             AND contact_content = ?2
+        ORDER BY
+            id DESC
+        LIMIT
+            ?3,?4
         ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let signup_iter = match stmt.query_map((contact_kind_id, contact_content), get_signup_from_row)
-    {
+    let signup_iter = match stmt.query_map(
+        (contact_kind_id, contact_content, offset, limit),
+        get_signup_from_row,
+    ) {
         Ok(signups) => signups,
         Err(e) => return Err(e.to_string()),
     };
