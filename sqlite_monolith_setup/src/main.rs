@@ -18,7 +18,7 @@ fn main() -> Result<(), String> {
         _ => return Err("no arguments provided".to_string()),
     };
     println!("{}", action);
-    
+
     let sqlite_path = match args.get(3) {
         Some(arg) => PathBuf::from(cwd).join(arg),
         _ => return Err("no arguments provided".to_string()),
@@ -35,10 +35,7 @@ fn main() -> Result<(), String> {
 }
 
 pub fn set_journal_mode_to_WAL2(conn: &mut Connection) -> Result<(), String> {
-    let results = conn.execute(
-        "PRAGMA journal_mode = wal2",
-        (),
-    );
+    let results = conn.execute("PRAGMA journal_mode = wal2", ());
 
     if let Err(e) = results {
         return Err("error setting journal mode to WAL2: \n".to_string() + &e.to_string());
@@ -49,7 +46,6 @@ pub fn set_journal_mode_to_WAL2(conn: &mut Connection) -> Result<(), String> {
 
 pub fn create_tables(conn: &mut Connection) -> Result<(), String> {
     // create connection
-
 
     if let Err(e) = contact_kinds::create_table(conn) {
         return Err(e);

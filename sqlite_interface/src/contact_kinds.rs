@@ -1,10 +1,8 @@
-use rusqlite::{Connection, Error as RusqliteError, Result, Row};
-
-use type_flyweight::contacts::ContactKind;
-
 // This table doesn't really scale, very shallow
-
 // Has a unique property so a general query should consider map->reduce form multiple servers
+
+use rusqlite::{Connection, Error as RusqliteError, MappedRows, Result, Row, Rows};
+use type_flyweight::contacts::ContactKind;
 
 fn get_contact_kind_from_row(row: &Row) -> Result<ContactKind, RusqliteError> {
     Ok(ContactKind {
@@ -31,11 +29,7 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(
-    conn: &mut Connection,
-    id: u64,
-    content: &str,
-) -> Result<Option<ContactKind>, String> {
+pub fn create(conn: &mut Connection, id: u64, content: &str) -> Result<ContactKind, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds
@@ -57,14 +51,14 @@ pub fn create(
 
     if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(Some(contact_kind));
+            return Ok(contact_kind);
         }
     }
 
-    Ok(None)
+    Err("failed to create a contact_kind".to_string())
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Option<ContactKind>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<ContactKind, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -72,6 +66,8 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<ContactKind>, Strin
         FROM
             contact_kinds
         WHERE
+            deleted_at IS NULL
+            AND
             id = ?1
         ",
     ) {
@@ -79,21 +75,22 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<ContactKind>, Strin
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind = match stmt.query_map([id], get_contact_kind_from_row) {
+    let mut contact_kind_iter = match stmt.query_map([id], get_contact_kind_from_row) {
         Ok(contact_kind) => contact_kind,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(contact_kind_maybe) = contact_kind.next() {
+    let mut contact_kinds: Vec<ContactKind> = Vec::new();
+    if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(Some(contact_kind));
+            return Ok(contact_kind);
         }
     }
 
-    Ok(None)
+    Err("failed to read contact_kind".to_string())
 }
 
-pub fn read_by_kind(conn: &mut Connection, kind: u64) -> Result<Option<ContactKind>, String> {
+pub fn read_by_kind(conn: &mut Connection, kind: &str) -> Result<ContactKind, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -101,6 +98,8 @@ pub fn read_by_kind(conn: &mut Connection, kind: u64) -> Result<Option<ContactKi
         FROM
             contact_kinds
         WHERE
+            deleted_at IS NULL
+            AND
             kind = ?1
         ",
     ) {
@@ -115,77 +114,9 @@ pub fn read_by_kind(conn: &mut Connection, kind: u64) -> Result<Option<ContactKi
 
     if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(Some(contact_kind));
+            return Ok(contact_kind);
         }
     }
 
-    Ok(None)
+    Err("failed to read a contact by kind".to_string())
 }
-
-// pub fn delete(
-//     conn: &mut Connection,
-//     contact_kind_id: u64,
-//     deleted_at: u64,
-// ) -> Result<Option<ContactKind>, String> {
-//     let mut stmt = match conn.prepare(
-//         "
-//         UPDATE
-//             contact_kind
-//         SET
-//             deleted_at = ?1
-//         WHERE
-//             id = ?2
-//         RETURNING
-//             *
-//     ",
-//     ) {
-//         Ok(stmt) => stmt,
-//         _ => return Err("cound not prepare statement".to_string()),
-//     };
-
-//     let mut contact_kind = match stmt.query_map((deleted_at, contact_kind_id), get_contact_kind_from_row)
-//     {
-//         Ok(contact_kind) => contact_kind,
-//         Err(e) => return Err(e.to_string()),
-//     };
-
-//     if let Some(contact_kind_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_kind_maybe {
-//             return Ok(Some(invitation));
-//         }
-//     }
-
-//     Ok(None)
-// }
-
-// pub fn dangerously_delete(
-//     conn: &mut Connection,
-//     contact_kind_id: u64,
-// ) -> Result<Option<ContactKind>, String> {
-//     let mut stmt = match conn.prepare(
-//         "
-//         DELETE
-//             contact_kind
-//         WHERE
-//             id = ?1
-//         RETURNING
-//             *
-//     ",
-//     ) {
-//         Ok(stmt) => stmt,
-//         _ => return Err("cound not prepare statement".to_string()),
-//     };
-
-//     let mut contact_kind = match stmt.query_map([contact_kind_id], get_contact_kind_from_row) {
-//         Ok(contact_kind) => contact_kind,
-//         Err(e) => return Err(e.to_string()),
-//     };
-
-//     if let Some(contact_kind_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_kind_maybe {
-//             return Ok(Some(invitation));
-//         }
-//     }
-
-//     Ok(None)
-// }

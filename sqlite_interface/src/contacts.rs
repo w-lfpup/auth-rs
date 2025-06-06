@@ -45,7 +45,7 @@ pub fn create(
     contact_kind_id: u64,
     content: &str,
     verified_at: Option<u64>,
-) -> Result<Option<Contact>, String> {
+) -> Result<Contact, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contacts
@@ -57,7 +57,7 @@ pub fn create(
     ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("failed to create a contact".to_string()),
     };
 
     let mut contact_iter = match stmt.query_map(
@@ -70,14 +70,14 @@ pub fn create(
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(Some(contact));
+            return Ok(contact);
         }
     }
 
-    Ok(None)
+    Err("failed to create a contact".to_string())
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Contact>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Contact, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -85,11 +85,13 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Contact>, String> {
         FROM
             contacts
         WHERE
+            deleted_at IS NULL
+            AND
             id = ?1
         ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("failed to read a contact".to_string()),
     };
 
     let mut contact_iter = match stmt.query_map([id], get_contact_from_row) {
@@ -99,18 +101,18 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Contact>, String> {
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(Some(contact));
+            return Ok(contact);
         }
     }
 
-    Ok(None)
+    Err("failed to read a contact".to_string())
 }
 
 pub fn read_by_kind_id_and_content(
     conn: &mut Connection,
     contact_kind_id: u64,
     content: &str,
-) -> Result<Option<Contact>, String> {
+) -> Result<Contact, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -118,13 +120,15 @@ pub fn read_by_kind_id_and_content(
         FROM
             contacts
         WHERE
-            kind = ?1
+            deleted_at IS NULL
+            AND
+            contact_kind_id = ?1
             AND
             content = ?2
         ",
     ) {
         Ok(stmt) => stmt,
-        _ => return Err("cound not prepare statement".to_string()),
+        _ => return Err("failed to read a contact by id".to_string()),
     };
 
     let mut contact_iter = match stmt.query_map((contact_kind_id, content), get_contact_from_row) {
@@ -134,77 +138,9 @@ pub fn read_by_kind_id_and_content(
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(Some(contact));
+            return Ok(contact);
         }
     }
 
-    Ok(None)
+    Err("failed to read a contact by kind_id and content".to_string())
 }
-
-// pub fn delete(
-//     conn: &mut Connection,
-//     contact_kind_id: u64,
-//     deleted_at: u64,
-// ) -> Result<Option<Contact>, String> {
-//     let mut stmt = match conn.prepare(
-//         "
-//         UPDATE
-//             contact_kind
-//         SET
-//             deleted_at = ?1
-//         WHERE
-//             id = ?2
-//         RETURNING
-//             *
-//     ",
-//     ) {
-//         Ok(stmt) => stmt,
-//         _ => return Err("cound not prepare statement".to_string()),
-//     };
-
-//     let mut contact_kind = match stmt.query_map((deleted_at, contact_kind_id), get_contact_from_row)
-//     {
-//         Ok(contact_kind) => contact_kind,
-//         Err(e) => return Err(e.to_string()),
-//     };
-
-//     if let Some(contact_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_maybe {
-//             return Ok(Some(invitation));
-//         }
-//     }
-
-//     Ok(None)
-// }
-
-// pub fn dangerously_delete(
-//     conn: &mut Connection,
-//     contact_kind_id: u64,
-// ) -> Result<Option<Contact>, String> {
-//     let mut stmt = match conn.prepare(
-//         "
-//         DELETE
-//             contact_kind
-//         WHERE
-//             id = ?1
-//         RETURNING
-//             *
-//     ",
-//     ) {
-//         Ok(stmt) => stmt,
-//         _ => return Err("cound not prepare statement".to_string()),
-//     };
-
-//     let mut contact_kind = match stmt.query_map([contact_kind_id], get_contact_from_row) {
-//         Ok(contact_kind) => contact_kind,
-//         Err(e) => return Err(e.to_string()),
-//     };
-
-//     if let Some(contact_maybe) = contact_kind.next() {
-//         if let Ok(invitation) = contact_maybe {
-//             return Ok(Some(invitation));
-//         }
-//     }
-
-//     Ok(None)
-// }
