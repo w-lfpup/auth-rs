@@ -1,14 +1,14 @@
 // EMAIL INVITATIONS
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub struct Session {
-    pub id: Option<u64>,
+    pub id: u64,
     pub people_id: Option<u64>,
     pub deleted_at: Option<u64>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 pub struct PublicSession {
     pub id: u64,
     pub people_id: Option<u64>,

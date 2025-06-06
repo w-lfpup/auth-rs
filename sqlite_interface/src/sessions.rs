@@ -89,7 +89,7 @@ pub fn read(conn: &mut Connection, session_id: u64) -> Result<Option<Session>, S
     Ok(None)
 }
 
-pub fn read_by_people_id(conn: &mut Connection, people_id: u64) -> Result<Vec<Session>, String> {
+pub fn read_all_by_people_id(conn: &mut Connection, people_id: u64, offset: usize, limit: usize) -> Result<Vec<Session>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -97,14 +97,20 @@ pub fn read_by_people_id(conn: &mut Connection, people_id: u64) -> Result<Vec<Se
         FROM
             sessions
         WHERE
+            deleted_at IS NULL
+            AND
             people_id = ?1
+        ORDER BY
+            id DESC
+        LIMIT
+            ?2,?3
         ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let session_iter = match stmt.query_map([people_id], get_session_from_row) {
+    let session_iter = match stmt.query_map((people_id, offset, limit), get_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };

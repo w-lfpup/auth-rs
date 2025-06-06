@@ -47,7 +47,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     assert!(Vec::from([sigup_confirmed]) == signup_read_by_contact);
-    assert!(Vec::from([incorrect_signup]) != signup_read_by_contact);
+    assert!(Vec::<Signup>::new() != signup_read_by_contact);
 
     Ok(())
 }
