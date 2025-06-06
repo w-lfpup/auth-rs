@@ -33,7 +33,7 @@ pub fn create(
     conn: &mut Connection,
     id: u64,
     password_hash_results: &str,
-) -> Result<Person, String> {
+) -> Result<Option<Person>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO people
@@ -55,14 +55,14 @@ pub fn create(
 
     if let Some(person_maybe) = people_iter.next() {
         if let Ok(person) = person_maybe {
-            return Ok(person);
+            return Ok(Some(person));
         }
     }
 
-    Err("failed to create a person".to_string())
+    Ok(None)
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Person, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Person>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -84,9 +84,9 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Person, String> {
 
     if let Some(person_maybe) = people_iter.next() {
         if let Ok(person) = person_maybe {
-            return Ok(person);
+            return Ok(Some(person));
         }
     }
 
-    Err("failed to read a person".to_string())
+    Ok(None)
 }

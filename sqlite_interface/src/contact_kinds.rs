@@ -29,7 +29,11 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(conn: &mut Connection, id: u64, content: &str) -> Result<ContactKind, String> {
+pub fn create(
+    conn: &mut Connection,
+    id: u64,
+    content: &str,
+) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds
@@ -51,14 +55,14 @@ pub fn create(conn: &mut Connection, id: u64, content: &str) -> Result<ContactKi
 
     if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(contact_kind);
+            return Ok(Some(contact_kind));
         }
     }
 
-    Err("failed to create a contact_kind".to_string())
+    Ok(None)
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<ContactKind, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -83,14 +87,14 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<ContactKind, String> {
     let mut contact_kinds: Vec<ContactKind> = Vec::new();
     if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(contact_kind);
+            return Ok(Some(contact_kind));
         }
     }
 
-    Err("failed to read contact_kind".to_string())
+    Ok(None)
 }
 
-pub fn read_by_kind(conn: &mut Connection, kind: &str) -> Result<ContactKind, String> {
+pub fn read_by_kind(conn: &mut Connection, kind: &str) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -114,9 +118,9 @@ pub fn read_by_kind(conn: &mut Connection, kind: &str) -> Result<ContactKind, St
 
     if let Some(contact_kind_maybe) = contact_kind_iter.next() {
         if let Ok(contact_kind) = contact_kind_maybe {
-            return Ok(contact_kind);
+            return Ok(Some(contact_kind));
         }
     }
 
-    Err("failed to read a contact by kind".to_string())
+    Ok(None)
 }

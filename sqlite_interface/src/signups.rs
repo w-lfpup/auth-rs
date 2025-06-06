@@ -37,7 +37,7 @@ pub fn create(
     token: u64,
     contact_kind_id: u64,
     contact_content: &str,
-) -> Result<Signup, String> {
+) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO signups
@@ -62,14 +62,14 @@ pub fn create(
 
     if let Some(signup_maybe) = signups.next() {
         if let Ok(singup) = signup_maybe {
-            return Ok(singup);
+            return Ok(Some(singup));
         }
     }
 
-    Err("failed to create a signup".to_string())
+    Ok(None)
 }
 
-pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Signup, String> {
+pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Option<Signup>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -93,11 +93,11 @@ pub fn read(conn: &mut Connection, signup_id: u64) -> Result<Signup, String> {
 
     if let Some(signup_maybe) = signups.next() {
         if let Ok(singup) = signup_maybe {
-            return Ok(singup);
+            return Ok(Some(singup));
         }
     }
 
-    Err("failed to read signup".to_string())
+    Ok(None)
 }
 
 pub fn read_all_by_contact(
@@ -114,8 +114,11 @@ pub fn read_all_by_contact(
         FROM
             signups
         WHERE
+            deleted_at IS NULL
+            AND
             contact_kind_id = ?1
-            AND contact_content = ?2
+            AND
+            contact_content = ?2
         ORDER BY
             id DESC
         LIMIT

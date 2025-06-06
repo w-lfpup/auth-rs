@@ -32,7 +32,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     assert!(contact == contact_read_by_id);
-    assert!(incorrect_contact != contact_read_by_id);
+    assert!(Some(incorrect_contact.clone()) != contact_read_by_id);
 
     // read by kind and content
     let mut contact_read_by_kind =
@@ -42,7 +42,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         };
 
     assert!(contact == contact_read_by_kind);
-    assert!(incorrect_contact != contact_read_by_kind);
+    assert!(Some(incorrect_contact.clone()) != contact_read_by_kind);
 
     Ok(())
 }

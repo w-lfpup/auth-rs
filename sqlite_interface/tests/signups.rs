@@ -25,13 +25,13 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // read by id
-    let mut signup_read_by_id = match signups::read(&mut conn, 1) {
+    let mut signup_read_by_id = match signups::read(&mut conn, 1234) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
 
     assert!(signup == signup_read_by_id);
-    assert!(incorrect_signup != signup_read_by_id);
+    assert!(Some(incorrect_signup.clone()) != signup_read_by_id);
 
     // read by kind and content
     let mut signup_read_by_contact =
@@ -40,7 +40,13 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
             Err(e) => return Err(e.into()),
         };
 
-    assert!(Vec::from([signup]) == signup_read_by_contact);
+    // THIS FEELS IFFY BUT IT SHOULD JUST FAIL?
+    let sigup_confirmed = match signup {
+        Some(su) => su,
+        _ => incorrect_signup.clone(),
+    };
+
+    assert!(Vec::from([sigup_confirmed]) == signup_read_by_contact);
     assert!(Vec::from([incorrect_signup]) != signup_read_by_contact);
 
     Ok(())

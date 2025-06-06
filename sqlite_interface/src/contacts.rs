@@ -45,7 +45,7 @@ pub fn create(
     contact_kind_id: u64,
     content: &str,
     verified_at: Option<u64>,
-) -> Result<Contact, String> {
+) -> Result<Option<Contact>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contacts
@@ -70,14 +70,14 @@ pub fn create(
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(contact);
+            return Ok(Some(contact));
         }
     }
 
-    Err("failed to create a contact".to_string())
+    Ok(None)
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Contact, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<Contact>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -101,18 +101,18 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Contact, String> {
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(contact);
+            return Ok(Some(contact));
         }
     }
 
-    Err("failed to read a contact".to_string())
+    Ok(None)
 }
 
 pub fn read_by_kind_id_and_content(
     conn: &mut Connection,
     contact_kind_id: u64,
     content: &str,
-) -> Result<Contact, String> {
+) -> Result<Option<Contact>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -138,9 +138,9 @@ pub fn read_by_kind_id_and_content(
 
     if let Some(contact_maybe) = contact_iter.next() {
         if let Ok(contact) = contact_maybe {
-            return Ok(contact);
+            return Ok(Some(contact));
         }
     }
 
-    Err("failed to read a contact by kind_id and content".to_string())
+    Ok(None)
 }
