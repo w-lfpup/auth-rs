@@ -17,11 +17,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create
-    let mut session = match sessions::create(
-        &mut conn,
-        16,
-        Some(42),
-    ) {
+    let mut session = match sessions::create(&mut conn, 16, Some(42)) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
@@ -35,7 +31,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(session == session_read_by_id);
     assert!(Some(incorrect_session.clone()) != session_read_by_id);
 
-        // read by kind and content
+    // read by kind and content
     let mut session_read_all_by_people_id =
         match sessions::read_all_by_people_id(&mut conn, 42, 0, 5) {
             Ok(ck) => ck,

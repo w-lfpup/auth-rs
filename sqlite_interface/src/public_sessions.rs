@@ -69,10 +69,7 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(
-    conn: &mut Connection,
-    public_session_id: u64,
-) -> Result<Option<PublicSession>, String> {
+pub fn read(conn: &mut Connection, id: u64) -> Result<Option<PublicSession>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -80,6 +77,8 @@ pub fn read(
         FROM
             public_sessions
         WHERE
+            deleted_at IS NULL
+            AND
             id = ?1
         ",
     ) {
@@ -87,7 +86,7 @@ pub fn read(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut sessions_iter = match stmt.query_map([public_session_id], get_public_session_from_row) {
+    let mut sessions_iter = match stmt.query_map([id], get_public_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
@@ -101,9 +100,11 @@ pub fn read(
     Ok(None)
 }
 
-pub fn read_by_session_id(
+pub fn read_all_by_session_id(
     conn: &mut Connection,
     session_id: u64,
+    offset: usize,
+    limit: usize,
 ) -> Result<Vec<PublicSession>, String> {
     let mut stmt = match conn.prepare(
         "
@@ -112,17 +113,24 @@ pub fn read_by_session_id(
         FROM
             public_sessions
         WHERE
+            deleted_at IS NULL
+            AND
             session_id = ?1
+        ORDER BY
+            id DESC
+        LIMIT
+            ?2,?3
         ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let public_sessions_iter = match stmt.query_map([session_id], get_public_session_from_row) {
-        Ok(sessions) => sessions,
-        Err(e) => return Err(e.to_string()),
-    };
+    let public_sessions_iter =
+        match stmt.query_map((session_id, offset, limit), get_public_session_from_row) {
+            Ok(sessions) => sessions,
+            Err(e) => return Err(e.to_string()),
+        };
 
     let mut sessions: Vec<PublicSession> = Vec::new();
     for session_maybe in public_sessions_iter {
@@ -134,9 +142,11 @@ pub fn read_by_session_id(
     Ok(sessions)
 }
 
-pub fn read_by_people_id(
+pub fn read_all_by_people_id(
     conn: &mut Connection,
-    people_id: u64,
+    people_id: Option<u64>,
+    offset: usize,
+    limit: usize,
 ) -> Result<Vec<PublicSession>, String> {
     let mut stmt = match conn.prepare(
         "
@@ -145,17 +155,24 @@ pub fn read_by_people_id(
         FROM
             public_sessions
         WHERE
+            deleted_at IS NULL
+            AND
             people_id = ?1
+        ORDER BY
+            id DESC
+        LIMIT
+            ?2,?3
         ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let public_sessions_iter = match stmt.query_map([people_id], get_public_session_from_row) {
-        Ok(sessions) => sessions,
-        Err(e) => return Err(e.to_string()),
-    };
+    let public_sessions_iter =
+        match stmt.query_map((people_id, offset, limit), get_public_session_from_row) {
+            Ok(sessions) => sessions,
+            Err(e) => return Err(e.to_string()),
+        };
 
     let mut sessions: Vec<PublicSession> = Vec::new();
     for session_maybe in public_sessions_iter {

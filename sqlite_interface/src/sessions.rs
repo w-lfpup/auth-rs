@@ -89,7 +89,12 @@ pub fn read(conn: &mut Connection, session_id: u64) -> Result<Option<Session>, S
     Ok(None)
 }
 
-pub fn read_all_by_people_id(conn: &mut Connection, people_id: u64, offset: usize, limit: usize) -> Result<Vec<Session>, String> {
+pub fn read_all_by_people_id(
+    conn: &mut Connection,
+    people_id: u64,
+    offset: usize,
+    limit: usize,
+) -> Result<Vec<Session>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
