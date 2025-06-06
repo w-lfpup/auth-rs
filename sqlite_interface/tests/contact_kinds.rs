@@ -10,6 +10,12 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         assert!(false, "failed to create contact_kinds table");
     }
 
+    let incorrect_contact_kind = ContactKind {
+        id: 0,
+        kind: "paper_cup_and_string".to_string(),
+        deleted_at: None,
+    };
+
     // create
     let contact_kind_maybe = match contact_kinds::create(&mut conn, 1, "email") {
         Ok(ck) => ck,
@@ -34,6 +40,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     assert!(contact_kind == contact_kind_read_by_id);
+    assert!(incorrect_contact_kind != contact_kind_read_by_id);
 
         // read by id
     let contact_kind_read_by_kind_maybe = match contact_kinds::read(&mut conn, 1) {
@@ -47,6 +54,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     assert!(contact_kind == contact_kind_read_by_kind);
+    assert!(incorrect_contact_kind != contact_kind_read_by_kind);
 
     println!("{:?}", contact_kind_read_by_kind);
 
