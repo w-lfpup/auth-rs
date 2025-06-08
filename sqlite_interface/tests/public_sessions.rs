@@ -56,11 +56,11 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
 
     // rate_limit_session
 
-    let mut public_session_rate_limit = match public_sessions::rate_limit_session(&mut conn, 16, 10)
-    {
-        Ok(ck) => ck,
-        Err(e) => return Err(e.into()),
-    };
+    let mut public_session_rate_limit =
+        match public_sessions::rate_limit_session(&mut conn, 16, 20, 10, 5) {
+            Ok(ck) => ck,
+            Err(e) => return Err(e.into()),
+        };
     assert!(None != public_session_rate_limit);
     println!("{:?}", public_session_rate_limit);
 

@@ -194,6 +194,8 @@ pub fn rate_limit_session(
     conn: &mut Connection,
     id: u64,
     current_timestamp: u64,
+    window_max_count: u64,
+    window_length_ms: u64,
 ) -> Result<Option<PublicSession>, String> {
     // update or ignore
 
@@ -203,11 +205,21 @@ pub fn rate_limit_session(
         UPDATE
             public_sessions
         SET
-            (window_count, prev_window_count) = (window_count + 1, prev_window_count + 1)
+            prev_window_count =
+                CASE
+                    WHEN ?1 > (?2 - updated_at) THEN prev_window_count
+                    ELSE MIN(window_count, ?3)
+                END,
+            window_count =
+                CASE
+                    WHEN ?1 > (?2 - updated_at) THEN (window_count + 1)
+                    ELSE 1
+                END,
+            updated_at = ?2
         WHERE
             deleted_at IS NULL
             AND
-            id = ?1
+            id = ?4
         RETURNING
             *
         ",
@@ -216,7 +228,10 @@ pub fn rate_limit_session(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut sessions_iter = match stmt.query_map([id], get_public_session_from_row) {
+    let mut sessions_iter = match stmt.query_map(
+        (window_length_ms, current_timestamp, window_max_count, id),
+        get_public_session_from_row,
+    ) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
