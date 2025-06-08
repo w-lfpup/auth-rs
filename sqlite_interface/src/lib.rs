@@ -1,5 +1,6 @@
 pub mod contact_kinds;
 pub mod contacts;
+pub mod ip_address_rate_limits;
 pub mod people;
 pub mod public_sessions;
 pub mod roles;
