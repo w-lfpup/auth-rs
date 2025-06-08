@@ -234,7 +234,13 @@ pub fn rate_limit_session(
     };
 
     let mut sessions_iter = match stmt.query_map(
-        (window_length_ms, current_timestamp, window_max_count, id, token),
+        (
+            window_length_ms,
+            current_timestamp,
+            window_max_count,
+            id,
+            token,
+        ),
         get_public_session_from_row,
     ) {
         Ok(sessions) => sessions,

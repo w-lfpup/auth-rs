@@ -55,7 +55,6 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(Vec::<PublicSession>::new() != public_session_read_all_by_session_id);
 
     // rate_limit_session
-
     let mut public_session_rate_limit =
         match public_sessions::rate_limit_session(&mut conn, 16, 7654, 20, 10, 5) {
             Ok(ck) => ck,
