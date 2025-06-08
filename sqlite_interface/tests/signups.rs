@@ -30,6 +30,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != signup);
     assert!(signup == signup_read_by_id);
     assert!(Some(incorrect_signup.clone()) != signup_read_by_id);
 

@@ -28,6 +28,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != session);
     assert!(session == session_read_by_id);
     assert!(Some(incorrect_session.clone()) != session_read_by_id);
 
@@ -44,7 +45,6 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         _ => incorrect_session.clone(),
     };
 
-    println!("{:?}", session_read_all_by_people_id);
     assert!(Vec::from([session_confirmed]) == session_read_all_by_people_id);
     assert!(Vec::<Session>::new() != session_read_all_by_people_id);
 

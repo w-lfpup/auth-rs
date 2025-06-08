@@ -28,6 +28,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != contact_kind);
     assert!(contact_kind == contact_kind_read_by_id);
     assert!(Some(incorrect_contact_kind.clone()) != contact_kind_read_by_id);
 
@@ -37,6 +38,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != contact_kind);
     assert!(contact_kind == contact_kind_read_by_kind);
     assert!(Some(incorrect_contact_kind.clone()) != contact_kind_read_by_kind);
 

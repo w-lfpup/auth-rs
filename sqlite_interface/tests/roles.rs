@@ -28,6 +28,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != role);
     assert!(role == role_read_by_id);
     assert!(Some(incorrect_role.clone()) != role_read_by_id);
 
@@ -38,6 +39,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != role);
     assert!(role == role_read_by_kind);
     assert!(Some(incorrect_role.clone()) != role_read_by_kind);
 

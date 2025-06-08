@@ -32,6 +32,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => return Err(e.into()),
     };
 
+    assert!(None != person);
     assert!(person == person_read_by_id);
     assert!(Some(incorrect_person) != person_read_by_id);
 

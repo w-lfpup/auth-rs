@@ -9,9 +9,9 @@ use type_flyweight::roles::RoleToPerson;
 fn get_role_to_people_from_row(row: &Row) -> Result<RoleToPerson, RusqliteError> {
     Ok(RoleToPerson {
         id: row.get(0)?,
-        role_id: row.get(2)?,
-        people_id: row.get(1)?,
-        deleted_at: row.get(5)?,
+        role_id: row.get(1)?,
+        people_id: row.get(2)?,
+        deleted_at: row.get(3)?,
     })
 }
 
@@ -103,7 +103,7 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<RoleToPerson>, Stri
 pub fn read_by_role_id_and_people_id(
     conn: &mut Connection,
     role_id: u64,
-    people_id: &u64,
+    people_id: u64,
 ) -> Result<Option<RoleToPerson>, String> {
     let mut stmt = match conn.prepare(
         "
