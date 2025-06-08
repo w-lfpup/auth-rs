@@ -19,15 +19,30 @@ const INVITATION_LENGTH_MS: usize = 2629800000;
 
 // create()
 // returns hexidecimal string
+//
+
+// RETURNS NONE when contact already exists
 pub fn create_signup_session(
     snowrpints: Arc<Mutex<Snowprints>>,
     conn: &mut Connection,
-    contact_type: &str,
+    contact_kind: &str,
     contact_content: &str,
-) -> Result<String, String> {
-    // get session length
-    // create db entry
-    // turn id and session into base64:base64
+) -> Result<Option<String>, String> {
+    // get contact kind
+
+    // see if contact already exists
+
+    // return none if contact already exists
+
+    // create snowprint
+
+    // create session
+
+    // create token
+
+    // create signup with snowprint, token, contact kind, contact content
+
+    // create signup session based on snowprint::token
 
     Err("failed to create signup session".to_string())
 }

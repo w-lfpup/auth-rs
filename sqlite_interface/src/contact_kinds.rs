@@ -29,11 +29,7 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(
-    conn: &mut Connection,
-    id: u64,
-    content: &str,
-) -> Result<Option<ContactKind>, String> {
+pub fn create(conn: &mut Connection, id: u64, kind: &str) -> Result<Option<ContactKind>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO contact_kinds
@@ -48,7 +44,7 @@ pub fn create(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut contact_kind_iter = match stmt.query_map((id, content), get_contact_kind_from_row) {
+    let mut contact_kind_iter = match stmt.query_map((id, kind), get_contact_kind_from_row) {
         Ok(kind_iter) => kind_iter,
         Err(e) => return Err(e.to_string()),
     };

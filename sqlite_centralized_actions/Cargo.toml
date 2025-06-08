@@ -1,5 +1,5 @@
 [package]
-name = "sqlite_monolith_actions"
+name = "sqlite_centralized_actions"
 version = "0.1.0"
 edition = "2021"
 
