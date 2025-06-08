@@ -40,25 +40,25 @@ pub fn rate_limit_ip_address(
 ) -> Result<Option<IpAddressRateLimit>, String> {
     let mut stmt = match conn.prepare(
         "
-            INSERT INTO ip_address_rate_limits
-                (ip_address, window_count, prev_window_count, updated_at)
-            VALUES
-                (?1, 1, 0, 0)
-            ON CONFLICT(ip_address) DO UPDATE
-                SET
-                    prev_window_count =
-                        CASE
-                            WHEN ?2 > (?3 - updated_at) THEN prev_window_count
-                            ELSE MIN(window_count, ?4)
-                        END,
-                    window_count =
-                        CASE
-                            WHEN ?2 > (?3 - updated_at) THEN (window_count + 1)
-                            ELSE 1
-                        END,
-                    updated_at = ?3
-            RETURNING
-                *
+        INSERT INTO ip_address_rate_limits
+            (ip_address, window_count, prev_window_count, updated_at)
+        VALUES
+            (?1, 1, 0, 0)
+        ON CONFLICT(ip_address) DO UPDATE
+            SET
+                prev_window_count =
+                    CASE
+                        WHEN ?2 > (?3 - updated_at) THEN prev_window_count
+                        ELSE MIN(window_count, ?4)
+                    END,
+                window_count =
+                    CASE
+                        WHEN ?2 > (?3 - updated_at) THEN (window_count + 1)
+                        ELSE 1
+                    END,
+                updated_at = ?3
+        RETURNING
+            *
         ",
     ) {
         Ok(stmt) => stmt,

@@ -1,8 +1,8 @@
 use std::env;
 use std::path::PathBuf;
 
-use rusqlite::{Connection, Error as RusqliteError, Result, Row};
-use sqlite_interface::{contact_kinds, contacts, people, public_sessions, sessions, signups};
+use rusqlite::{Connection, Result};
+// use sqlite_interface::{contact_kinds, contacts, people, public_sessions, sessions, signups};
 
 fn main() -> Result<(), String> {
     let cwd = match env::current_dir() {
@@ -23,7 +23,7 @@ fn main() -> Result<(), String> {
         Some(arg) => PathBuf::from(cwd).join(arg),
         _ => return Err("no arguments provided".to_string()),
     };
-    let mut conn = match Connection::open(sqlite_path) {
+    let _conn = match Connection::open(sqlite_path) {
         Ok(c) => c,
         Err(e) => return Err(e.to_string()),
     };

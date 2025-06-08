@@ -17,13 +17,13 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create
-    let mut role = match roles::create(&mut conn, 1, "lovers thatch time together") {
+    let role = match roles::create(&mut conn, 1, "lovers thatch time together") {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
 
     // read by id
-    let mut role_read_by_id = match roles::read(&mut conn, 1) {
+    let role_read_by_id = match roles::read(&mut conn, 1) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
@@ -33,7 +33,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(Some(incorrect_role.clone()) != role_read_by_id);
 
     // read by kind
-    let mut role_read_by_kind = match roles::read_by_kind(&mut conn, "lovers thatch time together")
+    let role_read_by_kind = match roles::read_by_kind(&mut conn, "lovers thatch time together")
     {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),

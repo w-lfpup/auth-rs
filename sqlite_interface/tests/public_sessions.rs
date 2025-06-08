@@ -22,13 +22,13 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create
-    let mut public_session = match public_sessions::create(&mut conn, 16, Some(64), 7654, 19) {
+    let public_session = match public_sessions::create(&mut conn, 16, Some(64), 7654, 19) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
 
     // read by id
-    let mut public_session_read_by_id = match public_sessions::read(&mut conn, 16, 7654) {
+    let public_session_read_by_id = match public_sessions::read(&mut conn, 16, 7654) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
@@ -55,7 +55,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(Vec::<PublicSession>::new() != public_session_read_all_by_session_id);
 
     // rate_limit_session
-    let mut public_session_rate_limit =
+    let public_session_rate_limit =
         match public_sessions::rate_limit_session(&mut conn, 16, 7654, 20, 10, 5) {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),

@@ -20,13 +20,13 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create
-    let mut contact = match contacts::create(&mut conn, 1, 2, 3, "email@email.email", None) {
+    let contact = match contacts::create(&mut conn, 1, 2, 3, "email@email.email", None) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
 
     // read by id
-    let mut contact_read_by_id = match contacts::read(&mut conn, 1) {
+    let contact_read_by_id = match contacts::read(&mut conn, 1) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
@@ -36,7 +36,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(Some(incorrect_contact.clone()) != contact_read_by_id);
 
     // read by kind and content
-    let mut contact_read_by_kind =
+    let contact_read_by_kind =
         match contacts::read_by_kind_id_and_content(&mut conn, 3, "email@email.email") {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),

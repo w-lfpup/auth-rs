@@ -17,7 +17,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // create
-    let mut person = match people::create(
+    let person = match people::create(
         &mut conn,
         1,
         "fold a piece of paper into something that you love",
@@ -27,7 +27,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // read by id
-    let mut person_read_by_id = match people::read(&mut conn, 1) {
+    let person_read_by_id = match people::read(&mut conn, 1) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
