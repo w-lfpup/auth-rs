@@ -29,11 +29,7 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn create(
-    conn: &mut Connection,
-    id: u64,
-    kind: &str,
-) -> Result<Option<Role>, String> {
+pub fn create(conn: &mut Connection, id: u64, kind: &str) -> Result<Option<Role>, String> {
     let mut stmt = match conn.prepare(
         "
         INSERT INTO roles
