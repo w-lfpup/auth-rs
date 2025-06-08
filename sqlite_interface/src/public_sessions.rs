@@ -8,7 +8,10 @@ fn get_public_session_from_row(row: &Row) -> Result<PublicSession, RusqliteError
         people_id: row.get(1)?,
         token: row.get(2)?,
         session_id: row.get(3)?,
-        deleted_at: row.get(4)?,
+        window_count: row.get(4)?,
+        prev_window_count: row.get(5)?,
+        updated_at: row.get(6)?,
+        deleted_at: row.get(7)?,
     })
 }
 
@@ -19,6 +22,9 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
             people_id INTEGER NOT NULL,
             token INTEGER NOT NULL,
             session_id INTEGER NOT NULL,
+            window_count INTEGER NOT NULL,
+            prev_window_count INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
             deleted_at INTEGER
         )",
         (),
@@ -41,9 +47,9 @@ pub fn create(
     let mut stmt = match conn.prepare(
         "
         INSERT INTO public_sessions
-            (id, people_id, token, session_id)
+            (id, people_id, token, session_id, window_count, prev_window_count, updated_at)
         VALUES
-            (?1, ?2, ?3, ?4)
+            (?1, ?2, ?3, ?4, 1, 0, 0)
         RETURNING
             *
     ",
@@ -182,4 +188,44 @@ pub fn read_all_by_people_id(
     }
 
     Ok(sessions)
+}
+
+pub fn rate_limit_session(
+    conn: &mut Connection,
+    id: u64,
+    current_timestamp: u64,
+) -> Result<Option<PublicSession>, String> {
+    // update or ignore
+
+    // provide id, window limit, window length, and current_timestamp
+    let mut stmt = match conn.prepare(
+        "
+        UPDATE
+            public_sessions
+        SET
+            (window_count, prev_window_count) = (window_count + 1, prev_window_count + 1)
+        WHERE
+            deleted_at IS NULL
+            AND
+            id = ?1
+        RETURNING
+            *
+        ",
+    ) {
+        Ok(stmt) => stmt,
+        _ => return Err("cound not prepare statement".to_string()),
+    };
+
+    let mut sessions_iter = match stmt.query_map([id], get_public_session_from_row) {
+        Ok(sessions) => sessions,
+        Err(e) => return Err(e.to_string()),
+    };
+
+    if let Some(session_maybe) = sessions_iter.next() {
+        if let Ok(public_session) = session_maybe {
+            return Ok(Some(public_session));
+        }
+    }
+
+    Ok(None)
 }

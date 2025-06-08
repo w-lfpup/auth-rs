@@ -15,6 +15,9 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         people_id: Some(47),
         token: 1234,
         session_id: 4321,
+        window_count: 42,
+        prev_window_count: 51,
+        updated_at: 27,
         deleted_at: None,
     };
 
@@ -50,6 +53,16 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(public_session_read_all_by_people_id == public_session_read_all_by_session_id);
     assert!(Vec::<PublicSession>::new() != public_session_read_all_by_people_id);
     assert!(Vec::<PublicSession>::new() != public_session_read_all_by_session_id);
+
+    // rate_limit_session
+
+    let mut public_session_rate_limit = match public_sessions::rate_limit_session(&mut conn, 16, 10)
+    {
+        Ok(ck) => ck,
+        Err(e) => return Err(e.into()),
+    };
+    assert!(None != public_session_rate_limit);
+    println!("{:?}", public_session_rate_limit);
 
     Ok(())
 }
