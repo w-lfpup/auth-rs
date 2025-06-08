@@ -202,7 +202,7 @@ pub fn rate_limit_session(
     // provide id, window limit, window length, and current_timestamp
     let mut stmt = match conn.prepare(
         "
-        UPDATE
+        UPDATE OR IGNORE
             public_sessions
         SET
             prev_window_count =

@@ -61,8 +61,20 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),
         };
+
+    let rate_limited_comparator = Some(PublicSession {
+        id: 16,
+        people_id: Some(64),
+        token: 7654,
+        session_id: 19,
+        window_count: 1,
+        prev_window_count: 1,
+        updated_at: 20,
+        deleted_at: None,
+    });
+
     assert!(None != public_session_rate_limit);
-    println!("{:?}", public_session_rate_limit);
+    assert!(rate_limited_comparator == public_session_rate_limit);
 
     Ok(())
 }
