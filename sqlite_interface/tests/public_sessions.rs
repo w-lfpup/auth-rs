@@ -28,7 +28,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // read by id
-    let mut public_session_read_by_id = match public_sessions::read(&mut conn, 16) {
+    let mut public_session_read_by_id = match public_sessions::read(&mut conn, 16, 7654) {
         Ok(ck) => ck,
         Err(e) => return Err(e.into()),
     };
@@ -57,7 +57,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     // rate_limit_session
 
     let mut public_session_rate_limit =
-        match public_sessions::rate_limit_session(&mut conn, 16, 20, 10, 5) {
+        match public_sessions::rate_limit_session(&mut conn, 16, 7654, 20, 10, 5) {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),
         };

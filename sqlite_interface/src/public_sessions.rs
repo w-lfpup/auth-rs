@@ -75,7 +75,7 @@ pub fn create(
     Ok(None)
 }
 
-pub fn read(conn: &mut Connection, id: u64) -> Result<Option<PublicSession>, String> {
+pub fn read(conn: &mut Connection, id: u64, token: u64) -> Result<Option<PublicSession>, String> {
     let mut stmt = match conn.prepare(
         "
         SELECT
@@ -86,13 +86,15 @@ pub fn read(conn: &mut Connection, id: u64) -> Result<Option<PublicSession>, Str
             deleted_at IS NULL
             AND
             id = ?1
+            AND
+            token = ?2
         ",
     ) {
         Ok(stmt) => stmt,
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut sessions_iter = match stmt.query_map([id], get_public_session_from_row) {
+    let mut sessions_iter = match stmt.query_map((id, token), get_public_session_from_row) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
@@ -193,6 +195,7 @@ pub fn read_all_by_people_id(
 pub fn rate_limit_session(
     conn: &mut Connection,
     id: u64,
+    token: u64,
     current_timestamp: u64,
     window_max_count: u64,
     window_length_ms: u64,
@@ -220,6 +223,8 @@ pub fn rate_limit_session(
             deleted_at IS NULL
             AND
             id = ?4
+            AND
+            token = ?5
         RETURNING
             *
         ",
@@ -229,7 +234,7 @@ pub fn rate_limit_session(
     };
 
     let mut sessions_iter = match stmt.query_map(
-        (window_length_ms, current_timestamp, window_max_count, id),
+        (window_length_ms, current_timestamp, window_max_count, id, token),
         get_public_session_from_row,
     ) {
         Ok(sessions) => sessions,
