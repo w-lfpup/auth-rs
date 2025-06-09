@@ -7,3 +7,4 @@ pub mod roles;
 pub mod roles_to_people;
 pub mod sessions;
 pub mod signups;
+pub mod totp;

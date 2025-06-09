@@ -35,6 +35,8 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         };
 
     assert!(ip_address_rate_limit != second_ip_address_rate_limit);
-    assert!(Some(incorrect_incorrect_ip_address_rate_limit.clone()) != second_ip_address_rate_limit);
+    assert!(
+        Some(incorrect_incorrect_ip_address_rate_limit.clone()) != second_ip_address_rate_limit
+    );
     Ok(())
 }

@@ -33,11 +33,10 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(Some(incorrect_session.clone()) != session_read_by_id);
 
     // read by kind and content
-    let session_read_all_by_people_id =
-        match sessions::read_all_by_people_id(&mut conn, 42, 0, 5) {
-            Ok(ck) => ck,
-            Err(e) => return Err(e.into()),
-        };
+    let session_read_all_by_people_id = match sessions::read_all_by_people_id(&mut conn, 42, 0, 5) {
+        Ok(ck) => ck,
+        Err(e) => return Err(e.into()),
+    };
 
     // THIS FEELS IFFY BUT IT SHOULD JUST FAIL?
     let session_confirmed = match session {
