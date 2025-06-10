@@ -1,0 +1,15 @@
+[package]
+name = "sqlite_centralized_actions"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+argon2 = { workspace = true}
+serde = { workspace = true }
+serde_json = { workspace = true }
+rusqlite = { workspace = true }
+snowprints = { workspace = true }
+rand = { workspace = true }
+base64 = { workspace = true }

@@ -1,0 +1,15 @@
+{
+    "sqlite": {
+        "db_path":  "./auth_db.sqlite",
+        "max_connections": 8
+    },
+    "auth": {
+        "origin_timestamp_ms": 0,
+        "logical_volume_base": 0,
+        "logical_volume_length": 8192,
+        "signup_session_length_ms": 86400000,
+        "session_length_ms": 15552000000,
+        "public_session_length_ms": 86400000,
+        "public_session_stale_length_ms": 2592000000
+    }
+}

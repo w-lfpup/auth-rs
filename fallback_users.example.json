@@ -1,0 +1,17 @@
+{
+    "contact_types": [
+        "email",
+        "phone"
+    ],
+    "roles": [
+        "administrator"
+    ],
+    "people": [
+        {
+            "contact_type": "email",
+            "contact_content": "myemail@furry.net",
+            "password": "superawesome",
+            "roles": ["administrator"]
+        }
+    ]
+}
