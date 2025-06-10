@@ -1,18 +1,38 @@
 # Auth-rs
 
-Authentication API for self hosted projects.
- 
-get signup session
-create account
-get guest session
-get user session
-verify user by password and contact
-validate and refresh outdated session
+
+ACTIONS
+
+- rate limit ip
+
+- create guest session
+    - rate limit session creation from ip address
+    - create session
+    - (also rate limit session)
+
+- signup
+
+- create account
+    - create person
+    - create password
+    - create totp?
+    - create session
+
+- login
+    - requires a guest session?
+    - rate limit login attempts
+    - create user session
+
+- verify session
+    - check if exists
+    - does the public session match the db
+    - (on write? is this session still active)
+    - rate limit session
+
+- logout
+    - delete session
+    - attempt to delete all public sessions
 
 
-limit by ip address
-limit by session
-roles by user
-roles by session
-create totp passcode-session
-verify user by totp
+- reset password
+- add contact

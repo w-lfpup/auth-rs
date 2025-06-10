@@ -1,7 +1,7 @@
 // This table doesn't really scale, very shallow
 // Has a unique property so a general query should consider map->reduce form multiple servers
 
-use rusqlite::{Connection, Error as RusqliteError, MappedRows, Result, Row, Rows};
+use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 use type_flyweight::contacts::ContactKind;
 
 fn get_contact_kind_from_row(row: &Row) -> Result<ContactKind, RusqliteError> {

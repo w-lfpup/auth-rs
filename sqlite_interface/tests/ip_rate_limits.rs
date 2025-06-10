@@ -12,6 +12,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
 
     let incorrect_incorrect_ip_address_rate_limit = IpAddressRateLimit {
         ip_address: "127.0.0.1".to_string(),
+        kind_id: 72,
         window_count: 42,
         prev_window_count: 51,
         updated_at: 27,
@@ -20,7 +21,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
 
     // create
     let ip_address_rate_limit =
-        match ip_address_rate_limits::rate_limit_ip_address(&mut conn, "127.0.0.1", 20, 10, 5) {
+        match ip_address_rate_limits::rate_limit_ip_address(&mut conn, "127.0.0.1", 1, 20, 10, 5) {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),
         };
@@ -29,7 +30,7 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
 
     // second rate limit
     let second_ip_address_rate_limit =
-        match ip_address_rate_limits::rate_limit_ip_address(&mut conn, "127.0.0.1", 20, 10, 5) {
+        match ip_address_rate_limits::rate_limit_ip_address(&mut conn, "127.0.0.1", 1, 20, 10, 5) {
             Ok(ck) => ck,
             Err(e) => return Err(e.into()),
         };
@@ -38,5 +39,6 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
     assert!(
         Some(incorrect_incorrect_ip_address_rate_limit.clone()) != second_ip_address_rate_limit
     );
+
     Ok(())
 }

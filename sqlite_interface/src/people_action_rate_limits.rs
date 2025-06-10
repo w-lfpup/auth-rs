@@ -1,10 +1,15 @@
 use rusqlite::{Connection, Error as RusqliteError, Result, Row};
 
-use type_flyweight::ip_address_rate_limits::IpAddressRateLimit;
+use type_flyweight::people_action_rate_limits::PeopleActionRateLimit;
 
-fn get_ip_address_rate_limit_from_row(row: &Row) -> Result<IpAddressRateLimit, RusqliteError> {
-    Ok(IpAddressRateLimit {
-        ip_address: row.get(0)?,
+// need to have a qualifier
+// rate limit stuff
+
+fn get_people_action_rate_limit_from_row(
+    row: &Row,
+) -> Result<PeopleActionRateLimit, RusqliteError> {
+    Ok(PeopleActionRateLimit {
+        people_id: row.get(0)?,
         kind_id: row.get(1)?,
         window_count: row.get(2)?,
         prev_window_count: row.get(3)?,
@@ -15,14 +20,14 @@ fn get_ip_address_rate_limit_from_row(row: &Row) -> Result<IpAddressRateLimit, R
 
 pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     let results = conn.execute(
-        "CREATE TABLE IF NOT EXISTS ip_address_rate_limits (
-            ip_address TEXT NOT NULL,
+        "CREATE TABLE IF NOT EXISTS people_action_rate_limits (
+            people_id INTEGER NOT NULL,
             kind_id INTEGER NOT NULL,
             window_count INTEGER NOT NULL,
             prev_window_count INTEGER NOT NULL,
             updated_at INTEGER NOT NULL,
             deleted_at INTEGER,
-            PRIMARY KEY (ip_address, kind_id)
+            PRIMARY KEY (people_id, kind_id)
         )",
         (),
     );
@@ -34,26 +39,25 @@ pub fn create_table(conn: &mut Connection) -> Result<(), String> {
     Ok(())
 }
 
-pub fn rate_limit_ip_address(
+pub fn rate_limit_people_action(
     conn: &mut Connection,
-    ip_address: &str,
+    people_id: u64,
     kind_id: u64,
     current_timestamp: u64,
-    max_window_count: u64,
     window_length_ms: u64,
-) -> Result<Option<IpAddressRateLimit>, String> {
+) -> Result<Option<PeopleActionRateLimit>, String> {
     let mut stmt = match conn.prepare(
         "
-        INSERT INTO ip_address_rate_limits
-            (ip_address, kind_id, window_count, prev_window_count, updated_at)
+        INSERT INTO people_action_rate_limits
+            (people_id, kind_id, window_count, prev_window_count, updated_at)
         VALUES
             (?1, ?2, 1, 0, 0)
-        ON CONFLICT(ip_address, kind_id) DO UPDATE
+        ON CONFLICT (people_id, kind_id) DO UPDATE
             SET
                 prev_window_count =
                     CASE
                         WHEN ?3 > (?4 - updated_at) THEN prev_window_count
-                        ELSE MIN(window_count, ?5)
+                        ELSE window_count
                     END,
                 window_count =
                     CASE
@@ -69,23 +73,17 @@ pub fn rate_limit_ip_address(
         _ => return Err("cound not prepare statement".to_string()),
     };
 
-    let mut ip_address_rate_limit_iter = match stmt.query_map(
-        (
-            ip_address,
-            kind_id,
-            window_length_ms,
-            current_timestamp,
-            max_window_count,
-        ),
-        get_ip_address_rate_limit_from_row,
+    let mut people_action_rate_limit_iter = match stmt.query_map(
+        (people_id, kind_id, window_length_ms, current_timestamp),
+        get_people_action_rate_limit_from_row,
     ) {
         Ok(sessions) => sessions,
         Err(e) => return Err(e.to_string()),
     };
 
-    if let Some(ip_address_rate_limit_maybe) = ip_address_rate_limit_iter.next() {
-        if let Ok(ip_address_rate_limit) = ip_address_rate_limit_maybe {
-            return Ok(Some(ip_address_rate_limit));
+    if let Some(people_action_rate_limit_maybe) = people_action_rate_limit_iter.next() {
+        if let Ok(people_action_rate_limit) = people_action_rate_limit_maybe {
+            return Ok(Some(people_action_rate_limit));
         }
     }
 
