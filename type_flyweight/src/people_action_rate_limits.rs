@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
-pub struct ActionKind {
+pub struct PeopleActionKind {
     pub id: u64,
     pub kind: String,
     pub deleted_at: Option<u64>,
