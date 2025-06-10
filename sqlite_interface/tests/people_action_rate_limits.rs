@@ -40,5 +40,6 @@ fn crud_operations() -> Result<(), Box<dyn std::error::Error>> {
         Some(incorrect_incorrect_people_action_rate_limit.clone())
             != second_people_action_rate_limit
     );
+
     Ok(())
 }
