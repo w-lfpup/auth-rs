@@ -1,11 +1,38 @@
-# Signup Actions
+# SQLITE CENTRALIZED ACTIONS
 
-- create signup session
-- create person & contact from signup session and password
-- verify person with id and password
-- verify person with contact and password
-- create session from id and password
-- create session from contact and password
-- verify_session (return updated session)
+BROAD STROKES simple API
 
-# Login Actions
+
+- rate limit ip
+
+- create guest session
+    - rate limit session creation from ip address
+    - create session
+    - (also rate limit session)
+
+- signup
+
+- create account
+    - create person
+    - create password
+    - create totp?
+    - create session
+
+- login
+    - requires a guest session?
+    - rate limit login attempts
+    - create user session
+
+- verify session
+    - check if exists
+    - does the public session match the db
+    - (on write? is this session still active)
+    - rate limit session
+
+- logout
+    - delete session
+    - attempt to delete all public sessions
+
+
+- reset password
+- add contact
